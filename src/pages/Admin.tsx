@@ -9,7 +9,7 @@ export default function Admin() {
   const [settings, setSettings] = useState<any>(null);
   const [withdrawals, setWithdrawals] = useState<any[]>([]);
 
-  const telegramId = WebApp.initDataUnsafe.user?.id || 123456789;
+  const telegramId = WebApp?.initDataUnsafe?.user?.id || 123456789;
   const adminId = Number(import.meta.env.VITE_ADMIN_TELEGRAM_ID || process.env.ADMIN_TELEGRAM_ID || 123456789);
 
   useEffect(() => {

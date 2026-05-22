@@ -14,7 +14,7 @@ export default function Dashboard() {
   const [adLoading, setAdLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  const telegramId = WebApp.initDataUnsafe.user?.id || 123456789; // Fallback for dev
+  const telegramId = WebApp?.initDataUnsafe?.user?.id || 123456789; // Fallback for dev
 
   useEffect(() => {
     fetchData();
