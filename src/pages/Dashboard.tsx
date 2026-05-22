@@ -14,7 +14,7 @@ export default function Dashboard() {
   const [adLoading, setAdLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  const telegramId = WebApp?.initDataUnsafe?.user?.id || 123456789; // Fallback for dev
+  const telegramId = WebApp?.initDataUnsafe?.user?.id || 7360769822; // Fallback for dev
 
   useEffect(() => {
     fetchData();
@@ -220,7 +220,7 @@ export default function Dashboard() {
         <span>{adLoading ? 'Viewing Ad...' : 'Watch Ad & Earn'}</span>
       </button>
 
-      {user?.telegram_id === Number(import.meta.env.VITE_ADMIN_TELEGRAM_ID || 123456789) && (
+      {user?.telegram_id === Number(import.meta.env.VITE_ADMIN_TELEGRAM_ID || 7360769822) && (
         <div className="mt-8 pt-6 border-t border-slate-900 text-center">
           <a href="/admin" className="text-slate-500 text-sm hover:text-slate-300">Admin Dashboard &rarr;</a>
         </div>
