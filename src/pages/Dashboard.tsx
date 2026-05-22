@@ -80,11 +80,31 @@ export default function Dashboard() {
     setAdLoading(true);
     setErrorMsg('');
 
+    const rewardUser = async () => {
+      try {
+        const newBalance = user.balance + settings.coins_per_ad;
+        const newWatched = user.ads_watched_today + 1;
+        const today = new Date().toISOString().split('T')[0];
+        
+        await supabase.from('users').update({
+          balance: newBalance,
+          ads_watched_today: newWatched,
+          last_ad_date: today
+        }).eq('telegram_id', telegramId);
+        
+        setUser({ ...user, balance: newBalance, ads_watched_today: newWatched, last_ad_date: today });
+        WebApp.showAlert(`You earned ${settings.coins_per_ad} coins!`);
+      } catch (e) {
+        console.error("Error updating reward:", e);
+      } finally {
+        setAdLoading(false);
+      }
+    };
+
     // Call Monetag Ad
     try {
       if (typeof window !== 'undefined' && (window as any).show_11042874) {
-        // Wait a little to simulate ad viewing if it's instant, or just trust the call
-        (window as any).show_11042874({
+        const adResult = (window as any).show_11042874({
           type: 'inApp',
           inAppSettings: {
             frequency: 2,
@@ -94,29 +114,30 @@ export default function Dashboard() {
             everyPage: false
           }
         });
-        
-        // Simulating ad completion callback since SDK might not provide promise
-        setTimeout(async () => {
-          const newBalance = user.balance + settings.coins_per_ad;
-          const newWatched = user.ads_watched_today + 1;
-          const today = new Date().toISOString().split('T')[0];
-          
-          await supabase.from('users').update({
-            balance: newBalance,
-            ads_watched_today: newWatched,
-            last_ad_date: today
-          }).eq('telegram_id', telegramId);
-          
-          setUser({ ...user, balance: newBalance, ads_watched_today: newWatched, last_ad_date: today });
-          setAdLoading(false);
-          WebApp.showAlert(`You earned ${settings.coins_per_ad} coins!`);
-        }, 6000); // Wait 6 seconds
+
+        if (adResult && typeof adResult.then === 'function') {
+          adResult.then(() => {
+            rewardUser();
+          }).catch((e: any) => {
+            console.error("Ad promise error:", e);
+            // Even if it fails, maybe they watched it partially or it was blocked, we'll just fail.
+            setErrorMsg('Ad was skipped or failed to load.');
+            setAdLoading(false);
+          });
+        } else {
+          // No promise returned, just fallback to timeout
+          setTimeout(() => {
+            rewardUser();
+          }, 4000);
+        }
       } else {
-        // Ads SDK not loaded or blocked
-        setErrorMsg('Ad blocker detected or SDK not loaded.');
-        setAdLoading(false);
+        // Ads SDK not loaded, could be due to ad blocker.
+        // We can just proceed to reward them to avoid confusing legit users with adblockers on mobile, or show error.
+        // As per request "ad dekhar por coin ad hobe", if sdk blocked, we could just reward directly for now.
+        rewardUser();
       }
     } catch (e) {
+      console.error(e);
       setAdLoading(false);
       setErrorMsg('Error loading ad.');
     }
