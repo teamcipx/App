@@ -22,33 +22,51 @@ export default function Dashboard() {
 
   const fetchData = async () => {
     setLoading(true);
-    // Fetch settings
-    const { data: settingsData } = await supabase.from('settings').select('*').eq('id', 1).single();
-    if (settingsData) {
-      setSettings(settingsData);
-      if (settingsData.notice_active && settingsData.notice_text) {
-        setShowNotice(true);
+    try {
+      // Fetch settings
+      const { data: settingsData, error: settingsError } = await supabase.from('settings').select('*').eq('id', 1).single();
+      
+      if (settingsError) {
+        console.error('Error fetching settings:', settingsError);
       }
-    }
+      
+      if (settingsData) {
+        setSettings(settingsData);
+        if (settingsData.notice_active && settingsData.notice_text) {
+          setShowNotice(true);
+        }
+      }
 
-    // Fetch user
-    const { data: userData } = await supabase.from('users').select('*').eq('telegram_id', telegramId).single();
-    if (userData) {
-      // Check if day changed to reset ad count
-      const today = new Date().toISOString().split('T')[0];
-      if (userData.last_ad_date !== today) {
-        await supabase.from('users').update({ ads_watched_today: 0, last_ad_date: today }).eq('telegram_id', telegramId);
-        userData.ads_watched_today = 0;
+      // Fetch user
+      const { data: userData, error: userError } = await supabase.from('users').select('*').eq('telegram_id', telegramId).single();
+      
+      if (userData) {
+        // Check if day changed to reset ad count
+        const today = new Date().toISOString().split('T')[0];
+        if (userData.last_ad_date !== today) {
+          await supabase.from('users').update({ ads_watched_today: 0, last_ad_date: today }).eq('telegram_id', telegramId);
+          userData.ads_watched_today = 0;
+        }
+        setUser(userData);
+      } else {
+        if (userError && userError.code !== 'PGRST116') { // PGRST116 is "not found"
+          console.error('Error fetching user:', userError);
+        }
+        
+        // Create user
+        const today = new Date().toISOString().split('T')[0];
+        const newUser = { telegram_id: telegramId, balance: 0, ads_watched_today: 0, last_ad_date: today };
+        const { error: insertError } = await supabase.from('users').insert([newUser]);
+        if (insertError) {
+           console.error('Error creating user:', insertError);
+        }
+        setUser(newUser);
       }
-      setUser(userData);
-    } else {
-      // Create user
-      const today = new Date().toISOString().split('T')[0];
-      const newUser = { telegram_id: telegramId, balance: 0, ads_watched_today: 0, last_ad_date: today };
-      await supabase.from('users').insert([newUser]);
-      setUser(newUser);
+    } catch (err) {
+      console.error('Unexpected error in fetchData:', err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleWatchAd = async () => {

@@ -22,15 +22,21 @@ export default function Admin() {
 
   const fetchData = async () => {
     setLoading(true);
-    // Fetch settings
-    const { data: s } = await supabase.from('settings').select('*').eq('id', 1).single();
-    if (s) setSettings(s);
+    try {
+      // Fetch settings
+      const { data: s, error: sErr } = await supabase.from('settings').select('*').eq('id', 1).single();
+      if (sErr) console.error('Error fetching settings:', sErr);
+      if (s) setSettings(s);
 
-    // Fetch withdrawals
-    const { data: w } = await supabase.from('withdrawals').select('*').order('created_at', { ascending: false }).limit(50);
-    if (w) setWithdrawals(w);
-
-    setLoading(false);
+      // Fetch withdrawals
+      const { data: w, error: wErr } = await supabase.from('withdrawals').select('*').order('created_at', { ascending: false }).limit(50);
+      if (wErr) console.error('Error fetching withdrawals:', wErr);
+      if (w) setWithdrawals(w);
+    } catch (err) {
+      console.error('Unexpected error fetching admin data:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleUpdateSetting = (field: string, value: any) => {

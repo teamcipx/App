@@ -6,8 +6,12 @@ import WebApp from '@twa-dev/sdk';
 
 export default function App() {
   useEffect(() => {
-    WebApp.ready();
-    WebApp.expand();
+    try {
+      WebApp.ready();
+      WebApp.expand();
+    } catch (e) {
+      console.log('WebApp init error', e);
+    }
   }, []);
 
   return (
