@@ -65,8 +65,19 @@ CREATE TABLE IF NOT EXISTS support_messages (
   created_at timestamp with time zone DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS reviews (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  telegram_id bigint NOT NULL,
+  name text NOT NULL,
+  text text NOT NULL,
+  image_url text,
+  is_admin_post boolean DEFAULT false,
+  created_at timestamp with time zone DEFAULT now()
+);
+
 -- Enable realtime for support_messages
 ALTER PUBLICATION supabase_realtime ADD TABLE support_messages;
+ALTER PUBLICATION supabase_realtime ADD TABLE reviews;
 
 -- Disable RLS for now so the app works with Anon key, or add policies
 ALTER TABLE settings DISABLE ROW LEVEL SECURITY;
@@ -76,6 +87,8 @@ ALTER TABLE tasks DISABLE ROW LEVEL SECURITY;
 ALTER TABLE user_tasks DISABLE ROW LEVEL SECURITY;
 ALTER TABLE support_chats DISABLE ROW LEVEL SECURITY;
 ALTER TABLE support_messages DISABLE ROW LEVEL SECURITY;
+ALTER TABLE reviews DISABLE ROW LEVEL SECURITY;
+
 
 -- Note: Since we are using an Anon Key for the MVP without authentication, 
 -- we will not enable Row Level Security (RLS) for now. 

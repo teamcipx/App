@@ -122,7 +122,7 @@ async function startServer() {
     let successCount = 0;
     let failCount = 0;
 
-    const options: TelegramBot.SendMessageOptions = {};
+    const options: any = { parse_mode: 'HTML' };
     if (buttonText && buttonUrl) {
       let finalUrl = buttonUrl.trim();
       if (!/^https?:\/\//i.test(finalUrl) && !/^tg:\/\//i.test(finalUrl)) {
@@ -137,7 +137,7 @@ async function startServer() {
 
     for (const telegramId of users) {
       try {
-        await bot.sendMessage(telegramId, message, Object.keys(options).length > 0 ? options : undefined);
+        await bot.sendMessage(telegramId, message, options);
         successCount++;
       } catch (err) {
         console.error(`Failed to send message to ${telegramId}:`, err);

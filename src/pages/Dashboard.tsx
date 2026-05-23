@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import WebApp from '@twa-dev/sdk';
-import { Coins, Bell, Wallet, LogOut, Loader2, Play, UserCircle, History as HistoryIcon, Trophy } from 'lucide-react';
+import { Coins, Bell, Wallet, LogOut, Loader2, Play, UserCircle, History as HistoryIcon, Trophy, MessageSquare } from 'lucide-react';
 import NoticeDialog from '../components/NoticeDialog';
 import WithdrawDialog from '../components/WithdrawDialog';
 import { useNavigate } from 'react-router-dom';
@@ -403,13 +403,14 @@ export default function Dashboard() {
             className="w-full bg-slate-900 border border-slate-800 hover:bg-slate-800 text-white p-4 rounded-3xl font-bold flex items-center justify-between transition-all active:scale-[0.98]"
           >
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-indigo-500/10 text-indigo-400 rounded-xl">
+               <div className="p-2 bg-indigo-500/10 text-indigo-400 rounded-xl">
                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-              </div>
-              <span className="text-lg">Daily Tasks</span>
+               </div>
+               <span className="text-lg">Daily Tasks</span>
             </div>
             <span className="bg-indigo-500/20 text-indigo-400 text-xs px-2 py-1 rounded-lg">Earn Extra</span>
           </button>
+          
           <div className="grid grid-cols-2 gap-4">
             <button
               onClick={() => navigate('/spin')}
@@ -432,6 +433,47 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      {/* Footer links */}
+      <div className="mt-6 space-y-3">
+        <button 
+          onClick={() => navigate('/reviews')}
+          className="w-full bg-slate-900 border border-slate-800 hover:bg-slate-800 text-white p-4 rounded-2xl font-medium flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+        >
+          <MessageSquare className="w-5 h-5 text-indigo-400" />
+          <span>Payment Proofs & Reviews</span>
+        </button>
+
+        <a 
+          href="https://t.me/xncoinofficial" 
+          target="_blank" 
+          rel="noreferrer"
+          className="w-full bg-blue-500/10 border border-blue-500/30 hover:bg-blue-500/20 text-blue-400 p-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+        >
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a5.96 5.96 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.892-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+          </svg>
+          <span>Join Telegram Channel</span>
+        </a>
+        
+        <button 
+          onClick={() => {}}
+          className="w-full bg-slate-900 border border-slate-800 text-slate-500 p-4 rounded-2xl font-medium flex items-center justify-center gap-2 transition-all cursor-not-allowed"
+        >
+          <svg className="w-5 h-5 opacity-50" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+          </svg>
+          <span>FB Page (Coming Soon)</span>
+        </button>
+
+        <button 
+          onClick={() => {}}
+          className="w-full bg-amber-500/5 text-amber-500/50 border border-amber-500/20 p-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all cursor-not-allowed"
+        >
+           <Play className="w-5 h-5 opacity-50" />
+           <span>How to work video (Coming Soon)</span>
+        </button>
+      </div>
 
       {user?.telegram_id === Number(import.meta.env.VITE_ADMIN_TELEGRAM_ID || 7360769822) && (
         <div className="mt-8 pt-6 border-t border-slate-900 text-center">

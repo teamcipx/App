@@ -10,9 +10,9 @@ import { Toaster } from 'sonner';
 import SupportWidget from './components/SupportWidget';
 
 import Leaderboard from './pages/Leaderboard';
-
 import Spin from './pages/Spin';
 import Scratch from './pages/Scratch';
+import Reviews from './pages/Reviews';
 
 export default function App() {
   useEffect(() => {
@@ -44,6 +44,7 @@ export default function App() {
           <Route path="/spin" element={<Spin />} />
           <Route path="/scratch" element={<Scratch />} />
           <Route path="/history" element={<History />} />
+          <Route path="/reviews" element={<Reviews />} />
         </Routes>
         <SupportWidget />
       </div>
