@@ -29,7 +29,13 @@ if (token) {
     const appUrl = process.env.APP_URL || 'https://example.com'; 
     const finalUrl = startParam ? `${appUrl}?startapp=${startParam}` : appUrl;
     
-    bot?.sendMessage(chatId, `🎉 Welcome to xN Coin Bot! 🪙\n\nWatch ads, complete tasks, and earn coins effortlessly! Convert your coins to real money.\n\nClick the button below to start earning now! 🚀`, {
+    let welcomeMessage = `🎉 Welcome to xN Coin Bot! 🪙\n\nWatch ads, complete tasks, and earn coins effortlessly! Convert your coins to real money.\n\nClick the button below to start earning now! 🚀`;
+
+    if (startParam) {
+      welcomeMessage = `🎉 Welcome to xN Coin Bot! 🪙\n\nYou were referred by a friend! Click below to open the app, claim your 500 Coin bonus, and start earning real money! 🚀`;
+    }
+
+    bot?.sendMessage(chatId, welcomeMessage, {
       reply_markup: {
         inline_keyboard: [
           [{ text: '📱 Open App & Earn', web_app: { url: finalUrl } }]
@@ -47,6 +53,34 @@ async function startServer() {
   // API route for health check
   app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', botActive: !!bot });
+  });
+
+  // API route for broadcasting messages
+  app.post('/api/broadcast', async (req, res) => {
+    const { message, users, adminId } = req.body;
+    
+    if (!adminId || !process.env.VITE_ADMIN_TELEGRAM_ID || adminId.toString() !== process.env.VITE_ADMIN_TELEGRAM_ID.toString()) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    if (!bot) {
+      return res.status(400).json({ error: 'Bot is not configured' });
+    }
+
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const telegramId of users) {
+      try {
+        await bot.sendMessage(telegramId, message);
+        successCount++;
+      } catch (err) {
+        console.error(`Failed to send message to ${telegramId}:`, err);
+        failCount++;
+      }
+    }
+
+    res.json({ success: true, successCount, failCount });
   });
 
   // Vite middleware for development

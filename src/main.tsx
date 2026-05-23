@@ -1,5 +1,5 @@
-import React, {StrictMode, Component, ReactNode} from 'react';
-import {createRoot} from 'react-dom/client';
+import React, { StrictMode, ReactNode } from 'react';
+import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 
@@ -12,7 +12,7 @@ interface State {
   error: Error | null;
 }
 
-class ErrorBoundary extends Component<Props, State> {
+class ErrorBoundary extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = { hasError: false, error: null };

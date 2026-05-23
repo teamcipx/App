@@ -121,6 +121,10 @@ export default function Dashboard() {
 
   const handleWatchAd = async () => {
     if (!settings || !user || adLoading || cooldown > 0) return;
+    if (user.is_banned) {
+      setErrorMsg('You are banned.');
+      return;
+    }
     if (user.ads_watched_today >= settings.daily_ad_limit) {
       setErrorMsg('Daily ad limit reached. Come back tomorrow!');
       setTimeout(() => setErrorMsg(''), 3000);
@@ -232,57 +236,68 @@ export default function Dashboard() {
           ID: {telegramId}
         </p>
       </div>
+      
+      {user?.is_banned && (
+        <div className="bg-red-500/10 border border-red-500/50 p-4 rounded-3xl mb-6 text-center">
+          <h2 className="text-red-400 font-bold mb-1">Account Banned</h2>
+          <p className="text-red-400/80 text-sm">Your account has been suspended for violating our terms of service.</p>
+        </div>
+      )}
 
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 mb-6 shadow-xl">
-        <div className="flex justify-between items-center mb-6 border-b border-slate-800 pb-6">
-          <div>
-            <p className="text-slate-400 text-sm font-medium mb-1">Your Balance</p>
-            <div className="flex items-baseline gap-2">
-              <span className="text-4xl font-bold tracking-tight text-white">{user?.balance || 0}</span>
-              <span className="text-indigo-400 font-medium">xNC</span>
+      {!user?.is_banned && (
+        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 mb-6 shadow-xl">
+          <div className="flex justify-between items-center mb-6 border-b border-slate-800 pb-6">
+            <div>
+              <p className="text-slate-400 text-sm font-medium mb-1">Your Balance</p>
+              <div className="flex items-baseline gap-2">
+                <span className="text-4xl font-bold tracking-tight text-white">{user?.balance || 0}</span>
+                <span className="text-indigo-400 font-medium">xNC</span>
+              </div>
             </div>
+            <button 
+              onClick={() => setShowWithdraw(true)}
+              className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white px-4 py-2.5 rounded-2xl transition-colors active:scale-95"
+            >
+              <Wallet className="w-4 h-4" />
+              <span>Withdraw</span>
+            </button>
           </div>
-          <button 
-            onClick={() => setShowWithdraw(true)}
-            className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white px-4 py-2.5 rounded-2xl transition-colors active:scale-95"
-          >
-            <Wallet className="w-4 h-4" />
-            <span>Withdraw</span>
-          </button>
-        </div>
 
-        <div className="flex justify-between items-center text-sm">
-          <span className="text-slate-400">Daily Ads Watched:</span>
-          <span className="font-mono bg-slate-950 px-2 py-0.5 rounded text-indigo-400">
-            {user?.ads_watched_today || 0} / {settings?.daily_ad_limit || 0}
-          </span>
+          <div className="flex justify-between items-center text-sm">
+            <span className="text-slate-400">Daily Ads Watched:</span>
+            <span className="font-mono bg-slate-950 px-2 py-0.5 rounded text-indigo-400">
+              {user?.ads_watched_today || 0} / {settings?.daily_ad_limit || 0}
+            </span>
+          </div>
         </div>
-      </div>
+      )}
 
-      {errorMsg && (
+      {!user?.is_banned && errorMsg && (
         <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-3 rounded-2xl mb-6 text-sm text-center">
           {errorMsg}
         </div>
       )}
 
-      <button
-        disabled={adLoading || cooldown > 0 || (user?.ads_watched_today >= settings?.daily_ad_limit)}
-        onClick={handleWatchAd}
-        className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white disabled:opacity-50 disabled:cursor-not-allowed p-4 rounded-3xl font-bold flex items-center justify-center gap-3 transition-all active:scale-95 shadow-lg shadow-indigo-500/25"
-      >
-        {adLoading ? (
-          <Loader2 className="w-6 h-6 animate-spin" />
-        ) : (
-          <Play className="w-6 h-6" fill="currentColor" />
-        )}
-        <span>
-          {adLoading 
-            ? 'Viewing Ad...' 
-            : cooldown > 0 
-              ? `Wait ${cooldown}s` 
-              : 'Watch Ad & Earn'}
-        </span>
-      </button>
+      {!user?.is_banned && (
+        <button
+          disabled={adLoading || cooldown > 0 || (user?.ads_watched_today >= settings?.daily_ad_limit)}
+          onClick={handleWatchAd}
+          className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white disabled:opacity-50 disabled:cursor-not-allowed p-4 rounded-3xl font-bold flex items-center justify-center gap-3 transition-all active:scale-95 shadow-lg shadow-indigo-500/25"
+        >
+          {adLoading ? (
+            <Loader2 className="w-6 h-6 animate-spin" />
+          ) : (
+            <Play className="w-6 h-6" fill="currentColor" />
+          )}
+          <span>
+            {adLoading 
+              ? 'Viewing Ad...' 
+              : cooldown > 0 
+                ? `Wait ${cooldown}s` 
+                : 'Watch Ad & Earn'}
+          </span>
+        </button>
+      )}
 
       {user?.telegram_id === Number(import.meta.env.VITE_ADMIN_TELEGRAM_ID || 7360769822) && (
         <div className="mt-8 pt-6 border-t border-slate-900 text-center">
