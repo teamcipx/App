@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS users (
   balance integer NOT NULL DEFAULT 0,
   ads_watched_today integer NOT NULL DEFAULT 0,
   last_ad_date text NOT NULL DEFAULT '',
+  referred_by bigint REFERENCES users(telegram_id),
   created_at timestamp with time zone DEFAULT now()
 );
 

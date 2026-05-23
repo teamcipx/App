@@ -12,7 +12,7 @@ export default function Account() {
   const navigate = useNavigate();
 
   const telegramId = WebApp?.initDataUnsafe?.user?.id || 7360769822; // Fallback for dev
-  const botName = import.meta.env.VITE_BOT_NAME || 'YourBotUsername'; // Make sure this env var exists or fallback
+  const botName = import.meta.env.VITE_BOT_NAME || 'xnearnbot'; // Make sure this env var exists or fallback
   
   useEffect(() => {
     fetchData();

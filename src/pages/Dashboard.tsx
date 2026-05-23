@@ -120,7 +120,7 @@ export default function Dashboard() {
   };
 
   const handleWatchAd = async () => {
-    if (!settings || !user) return;
+    if (!settings || !user || adLoading || cooldown > 0) return;
     if (user.ads_watched_today >= settings.daily_ad_limit) {
       setErrorMsg('Daily ad limit reached. Come back tomorrow!');
       setTimeout(() => setErrorMsg(''), 3000);
