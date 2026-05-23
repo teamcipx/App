@@ -124,9 +124,13 @@ async function startServer() {
 
     const options: TelegramBot.SendMessageOptions = {};
     if (buttonText && buttonUrl) {
+      let finalUrl = buttonUrl.trim();
+      if (!/^https?:\/\//i.test(finalUrl) && !/^tg:\/\//i.test(finalUrl)) {
+         finalUrl = 'https://' + finalUrl;
+      }
       options.reply_markup = {
         inline_keyboard: [
-          [{ text: buttonText, url: buttonUrl }]
+          [{ text: buttonText, url: finalUrl }]
         ]
       };
     }

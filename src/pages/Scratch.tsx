@@ -44,8 +44,14 @@ export default function Scratch() {
       return;
     }
 
-    // Random reward between 10 and 200
-    const reward = Math.floor(Math.random() * (200 - 10 + 1)) + 10;
+    // 60% chance between 10 and 99, 40% chance between 100 and 200
+    let reward;
+    if (Math.random() < 0.60) {
+      reward = Math.floor(Math.random() * (99 - 10 + 1)) + 10;
+    } else {
+      reward = Math.floor(Math.random() * (200 - 100 + 1)) + 100;
+    }
+    
     setCurrentReward(reward);
     setScratched(true);
     

@@ -412,6 +412,17 @@ export default function Admin() {
             </div>
             
             <div className="pt-4 mt-4 border-t border-slate-800">
+              <label className="block text-sm font-medium text-slate-400 mb-1">ImgBB API Keys (comma separated)</label>
+              <input 
+                type="text" 
+                value={imgbbKey} 
+                onChange={(e) => setImgbbKey(e.target.value)} 
+                placeholder="key1,key2"
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-indigo-500" 
+              />
+            </div>
+            
+            <div className="pt-4 mt-4 border-t border-slate-800">
               <div className="flex items-center justify-between mb-4">
                 <label className="text-sm font-medium text-slate-400">Enable Popup Notice</label>
                 <button 
@@ -608,16 +619,6 @@ export default function Admin() {
                 onChange={e => setBroadcastBtnUrl(e.target.value)}
                 placeholder="e.g. https://..."
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-            <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800">
-              <label className="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">ImgBB API Keys (comma separated)</label>
-              <input 
-                type="text" 
-                value={imgbbKey} 
-                onChange={(e) => setImgbbKey(e.target.value)} 
-                placeholder="key1,key2"
-                className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500" 
               />
             </div>
           </div>
