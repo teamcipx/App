@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import WebApp from '@twa-dev/sdk';
-import { History as HistoryIcon, ArrowLeft, Loader2, ListTodo, Wallet, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { History as HistoryIcon, ArrowLeft, Loader2, ListTodo, Wallet, Clock, CheckCircle, XCircle, Play } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function History() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'withdrawals' | 'earnings'>('withdrawals');
   const [withdrawals, setWithdrawals] = useState<any[]>([]);
-  const [taskHistory, setTaskHistory] = useState<any[]>([]);
+  const [earnings, setEarnings] = useState<any[]>([]);
   const navigate = useNavigate();
 
   const telegramId = WebApp?.initDataUnsafe?.user?.id || 7360769822;
@@ -24,7 +24,35 @@ export default function History() {
       if (wRes.data && !wRes.error) setWithdrawals(wRes.data);
 
       const utRes = await supabase.from('user_tasks').select('id, last_completed, tasks(title, reward)').eq('telegram_id', telegramId).order('last_completed', { ascending: false });
-      if (utRes.data && !utRes.error) setTaskHistory(utRes.data);
+      const adRes = await supabase.from('ad_history').select('*').eq('telegram_id', telegramId).order('created_at', { ascending: false });
+      
+      let allEarnings: any[] = [];
+      
+      if (utRes.data && !utRes.error) {
+         const formattedTasks = utRes.data.map(t => ({
+           id: `task_${t.id}`,
+           title: t.tasks?.title || 'Unknown Task',
+           reward: t.tasks?.reward || 0,
+           date: t.last_completed,
+           type: 'task'
+         }));
+         allEarnings = [...allEarnings, ...formattedTasks];
+      }
+
+      if (adRes.data && !adRes.error) {
+         const formattedAds = adRes.data.map(a => ({
+           id: `ad_${a.id}`,
+           title: 'Watched Ad',
+           reward: a.reward_amount,
+           date: a.created_at,
+           type: 'ad'
+         }));
+         allEarnings = [...allEarnings, ...formattedAds];
+      }
+
+      // Sort by date descending
+      allEarnings.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      setEarnings(allEarnings);
 
     } catch (err) {
       console.error(err);
@@ -91,23 +119,28 @@ export default function History() {
 
         {activeTab === 'earnings' && (
           <>
-            {taskHistory.length === 0 && (
+            {earnings.length === 0 && (
               <div className="text-center py-10 bg-slate-900 border border-slate-800 rounded-2xl">
                 <ListTodo className="w-12 h-12 text-slate-700 mx-auto mb-3" />
-                <p className="text-slate-400 font-medium">No tasks completed yet.</p>
+                <p className="text-slate-400 font-medium">No earnings yet.</p>
               </div>
             )}
-            {taskHistory.map(th => {
-              const taskTitle = th.tasks?.title || 'Unknown Task';
-              const taskReward = th.tasks?.reward || 0;
+            {earnings.map(earn => {
               return (
-                <div key={th.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg flex items-center justify-between">
+                <div key={earn.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg flex items-center justify-between">
                    <div className="flex-1">
-                      <p className="text-white font-bold flex items-center gap-2"><ListTodo className="w-4 h-4 text-indigo-400"/> {taskTitle}</p>
-                      <p className="text-slate-500 text-xs mt-1">{new Date(th.last_completed).toLocaleString()}</p>
+                      <p className="text-white font-bold flex items-center gap-2">
+                        {earn.type === 'ad' ? (
+                          <Play className="w-4 h-4 text-purple-400"/>
+                        ) : (
+                          <ListTodo className="w-4 h-4 text-indigo-400"/>
+                        )}
+                        {earn.title}
+                      </p>
+                      <p className="text-slate-500 text-xs mt-1">{new Date(earn.date).toLocaleString()}</p>
                    </div>
                    <div className="text-right">
-                      <span className="text-green-400 font-bold bg-green-400/10 px-2 py-1 rounded-lg">+{taskReward} Coins</span>
+                      <span className="text-green-400 font-bold bg-green-400/10 px-2 py-1 rounded-lg">+{earn.reward} Coins</span>
                    </div>
                 </div>
               );

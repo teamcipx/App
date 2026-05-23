@@ -38,13 +38,9 @@ export default function Dashboard() {
         clearInterval(checkAd);
       }
     }, 1000);
-    
-    // Fallback: if ad blocker blocks the script, we still let them proceed after 5 seconds to not break the app
-    const fallback = setTimeout(() => setAdReady(true), 5000);
 
     return () => {
       clearInterval(checkAd);
-      clearTimeout(fallback);
     }
   }, []);
 
@@ -179,13 +175,25 @@ export default function Dashboard() {
         const newWatched = user.ads_watched_today + 1;
         const today = new Date().toISOString().split('T')[0];
         
+        // Update user balance
         await supabase.from('users').update({
           balance: newBalance,
           ads_watched_today: newWatched,
           last_ad_date: today
         }).eq('telegram_id', telegramId);
         
+        // Log ad history (ignore errors if table doesn't exist yet)
+        try {
+          await supabase.from('ad_history').insert([{
+            telegram_id: telegramId,
+            reward_amount: settings.coins_per_ad
+          }]);
+        } catch (adErr) {
+          console.error("Ad history logging failed:", adErr);
+        }
+
         setUser({ ...user, balance: newBalance, ads_watched_today: newWatched, last_ad_date: today });
+
         setCooldown(20); // 20 seconds cooldown
         WebApp.showAlert(`You earned ${settings.coins_per_ad} coins!`);
       } catch (e) {
