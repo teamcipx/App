@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import path from 'path';
 import cors from 'cors';
@@ -59,7 +60,9 @@ async function startServer() {
   app.post('/api/broadcast', async (req, res) => {
     const { message, users, adminId } = req.body;
     
-    if (!adminId || !process.env.VITE_ADMIN_TELEGRAM_ID || adminId.toString() !== process.env.VITE_ADMIN_TELEGRAM_ID.toString()) {
+    const envAdminId = process.env.ADMIN_TELEGRAM_ID || process.env.VITE_ADMIN_TELEGRAM_ID;
+
+    if (!adminId || !envAdminId || adminId.toString() !== envAdminId.toString()) {
       return res.status(403).json({ error: 'Unauthorized' });
     }
 

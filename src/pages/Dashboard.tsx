@@ -34,12 +34,14 @@ export default function Dashboard() {
 
   const fetchData = async () => {
     setLoading(true);
+    let hasError = false;
     try {
       // Fetch settings
       const { data: settingsData, error: settingsError } = await supabase.from('settings').select('*').eq('id', 1).single();
       
       if (settingsError) {
         console.error('Error fetching settings:', settingsError);
+        hasError = true;
       }
       
       if (settingsData) {
@@ -63,6 +65,7 @@ export default function Dashboard() {
       } else {
         if (userError && userError.code !== 'PGRST116') { // PGRST116 is "not found"
           console.error('Error fetching user:', userError);
+          hasError = true;
         }
         
         // Create user
@@ -109,11 +112,17 @@ export default function Dashboard() {
         
         if (insertError) {
           console.error('Error creating user:', insertError);
+          hasError = true;
         }
         setUser(newUser);
       }
+      
+      if (hasError) {
+        setErrorMsg('Database connection error. Make sure you have executed the new SQL query in Supabase and disabled RLS.');
+      }
     } catch (err) {
       console.error('Unexpected error in fetchData:', err);
+      setErrorMsg('Unexpected database error.');
     } finally {
       setLoading(false);
     }

@@ -32,6 +32,11 @@ CREATE TABLE IF NOT EXISTS withdrawals (
   created_at timestamp with time zone DEFAULT now()
 );
 
+-- Disable RLS for now so the app works with Anon key, or add policies
+ALTER TABLE settings DISABLE ROW LEVEL SECURITY;
+ALTER TABLE users DISABLE ROW LEVEL SECURITY;
+ALTER TABLE withdrawals DISABLE ROW LEVEL SECURITY;
+
 -- Note: Since we are using an Anon Key for the MVP without authentication, 
 -- we will not enable Row Level Security (RLS) for now. 
 -- In a production environment, you MUST implement RLS and authenticate users properly 
