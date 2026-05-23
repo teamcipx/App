@@ -209,29 +209,18 @@ export default function Dashboard() {
           }
         });
 
-        let rewardHandled = false;
-        const triggerRewardTimer = () => {
-          if (rewardHandled) return;
-          rewardHandled = true;
-          let timeLeft = 20;
-          setErrorMsg(`Please wait ${timeLeft}s to claim reward...`);
-          setAdLoading(true);
-          
-          const timer = setInterval(() => {
-            timeLeft -= 1;
-            if (timeLeft <= 0) {
-              clearInterval(timer);
-              setErrorMsg('');
-              rewardUser();
-            } else {
-              setErrorMsg(`Please wait ${timeLeft}s to claim reward...`);
-            }
-          }, 1000);
+        const handleRewardTimer = () => {
+          setAdLoading(false);
+          setCooldown(20);
+          WebApp.showAlert('Ad opened! Your reward will be added in 20 seconds.');
+          setTimeout(() => {
+            rewardUser();
+          }, 20000);
         };
 
         if (adResult && typeof adResult.then === 'function') {
           adResult.then(() => {
-            triggerRewardTimer();
+            handleRewardTimer();
           }).catch((e: any) => {
             console.error("Ad promise error:", e);
             setErrorMsg('Ad was skipped or failed to load.');
@@ -240,23 +229,17 @@ export default function Dashboard() {
         } else {
           // No promise returned, just fallback to timeout
           setTimeout(() => {
-            triggerRewardTimer();
-          }, 4000);
+            handleRewardTimer();
+          }, 2000);
         }
       } else {
         // Ads SDK not loaded
-        let timeLeft = 20;
-        setErrorMsg(`Alternative ad loading... Please wait ${timeLeft}s`);
-        const timer = setInterval(() => {
-          timeLeft -= 1;
-          if (timeLeft <= 0) {
-            clearInterval(timer);
-            setErrorMsg('');
-            rewardUser();
-          } else {
-            setErrorMsg(`Alternative ad loading... Please wait ${timeLeft}s`);
-          }
-        }, 1000);
+        setAdLoading(false);
+        setCooldown(20);
+        WebApp.showAlert('Alternative Ad opened! Reward in 20 seconds.');
+        setTimeout(() => {
+          rewardUser();
+        }, 20000);
       }
     } catch (e) {
       console.error(e);

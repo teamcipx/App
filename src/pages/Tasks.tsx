@@ -9,6 +9,7 @@ export default function Tasks() {
   const [tasks, setTasks] = useState<any[]>([]);
   const [userTasks, setUserTasks] = useState<any[]>([]);
   const [activeTaskTimer, setActiveTaskTimer] = useState<{ id: string, timeLeft: number } | null>(null);
+  const [failedTasks, setFailedTasks] = useState<string[]>([]);
   const [userBalance, setUserBalance] = useState(0);
   const navigate = useNavigate();
 
@@ -34,8 +35,8 @@ export default function Tasks() {
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (!document.hidden && activeTaskTimer && activeTaskTimer.timeLeft > 1) {
-        // Returned to the app before timer finished (allow 1s buffer)
         WebApp.showAlert(`You returned too early! You must stay on the webpage for the full time.`);
+        setFailedTasks(prev => Array.from(new Set([...prev, activeTaskTimer.id])));
         setActiveTaskTimer(null);
       }
     };
@@ -163,6 +164,7 @@ export default function Tasks() {
         {tasks.map(task => {
           const { status, timeRemaining } = getTaskStatus(task.id);
           const isActive = activeTaskTimer?.id === task.id;
+          const isFailed = failedTasks.includes(task.id);
 
           return (
             <div key={task.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg relative overflow-hidden">
@@ -189,8 +191,8 @@ export default function Tasks() {
                         <Loader2 className="w-4 h-4 animate-spin" /> Verifying... {activeTaskTimer.timeLeft}s
                       </button>
                     ) : (
-                      <button onClick={() => handleStartTask(task)} className="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-transform active:scale-[0.98]">
-                        Start Task <ExternalLink className="w-4 h-4" />
+                      <button onClick={() => handleStartTask(task)} className={`w-full ${isFailed ? 'bg-amber-600 hover:bg-amber-500' : 'bg-indigo-600 hover:bg-indigo-500'} text-white py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-transform active:scale-[0.98]`}>
+                        {isFailed ? 'Resume Task' : 'Start Task'} <ExternalLink className="w-4 h-4" />
                       </button>
                     )
                   ) : (
