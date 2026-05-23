@@ -18,7 +18,9 @@ export default function Dashboard() {
   const navigate = useNavigate();
 
   const telegramId = WebApp?.initDataUnsafe?.user?.id || 7360769822; // Fallback for dev
-  const startParam = WebApp?.initDataUnsafe?.start_param;
+  const urlParams = new URLSearchParams(window.location.search);
+  const startParam = WebApp?.initDataUnsafe?.start_param || urlParams.get('startapp') || urlParams.get('tgWebAppStartParam');
+
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -103,18 +105,28 @@ export default function Dashboard() {
         if (insertError) {
            console.error('Error creating user (might be missing referred_by column?):', insertError);
            // Retry without referred_by
-           if (newUser.referred_by) {
+           if (newUser.referred_by !== undefined) {
              delete newUser.referred_by;
              const retryRes = await supabase.from('users').insert([newUser]);
              insertError = retryRes.error;
            }
         }
         
-        if (insertError) {
+        if (insertError && insertError.code !== '23505') { // 23505 is unique violation
           console.error('Error creating user:', insertError);
           hasError = true;
+        } else {
+          // If it was a duplicate key error, fetch the user again
+          if (insertError && insertError.code === '23505') {
+            const { data: existingUser } = await supabase.from('users').select('*').eq('telegram_id', telegramId).single();
+            if (existingUser) setUser(existingUser);
+            insertError = null;
+          }
         }
-        setUser(newUser);
+
+        if (!insertError && !user) {
+          setUser(newUser);
+        }
       }
       
       if (hasError) {

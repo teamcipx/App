@@ -37,7 +37,7 @@ export default function Account() {
     }
   };
 
-  const referralLink = `https://t.me/${botName}?startapp=${telegramId}`;
+  const referralLink = `https://t.me/${botName}?start=${telegramId}`;
 
   const copyLink = () => {
     navigator.clipboard.writeText(referralLink);
