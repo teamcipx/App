@@ -300,24 +300,39 @@ export default function Dashboard() {
       )}
 
       {!user?.is_banned && (
-        <button
-          disabled={adLoading || cooldown > 0 || (user?.ads_watched_today >= settings?.daily_ad_limit)}
-          onClick={handleWatchAd}
-          className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white disabled:opacity-50 disabled:cursor-not-allowed p-4 rounded-3xl font-bold flex items-center justify-center gap-3 transition-all active:scale-95 shadow-lg shadow-indigo-500/25"
-        >
-          {adLoading ? (
-            <Loader2 className="w-6 h-6 animate-spin" />
-          ) : (
-            <Play className="w-6 h-6" fill="currentColor" />
-          )}
-          <span>
-            {adLoading 
-              ? 'Viewing Ad...' 
-              : cooldown > 0 
-                ? `Wait ${cooldown}s` 
-                : 'Watch Ad & Earn'}
-          </span>
-        </button>
+        <div className="space-y-4">
+          <button
+            disabled={adLoading || cooldown > 0 || (user?.ads_watched_today >= settings?.daily_ad_limit)}
+            onClick={handleWatchAd}
+            className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white disabled:opacity-50 disabled:cursor-not-allowed p-4 rounded-3xl font-bold flex items-center justify-center gap-3 transition-all active:scale-[0.98] shadow-lg shadow-indigo-500/25"
+          >
+            {adLoading ? (
+              <Loader2 className="w-6 h-6 animate-spin" />
+            ) : (
+              <Play className="w-6 h-6" fill="currentColor" />
+            )}
+            <span>
+              {adLoading 
+                ? 'Viewing Ad...' 
+                : cooldown > 0 
+                  ? `Wait ${cooldown}s` 
+                  : 'Watch Ad & Earn'}
+            </span>
+          </button>
+
+          <button
+            onClick={() => navigate('/tasks')}
+            className="w-full bg-slate-900 border border-slate-800 hover:bg-slate-800 text-white p-4 rounded-3xl font-bold flex items-center justify-between transition-all active:scale-[0.98]"
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-indigo-500/10 text-indigo-400 rounded-xl">
+                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              </div>
+              <span className="text-lg">Daily Tasks</span>
+            </div>
+            <span className="bg-indigo-500/20 text-indigo-400 text-xs px-2 py-1 rounded-lg">Earn Extra</span>
+          </button>
+        </div>
       )}
 
       {user?.telegram_id === Number(import.meta.env.VITE_ADMIN_TELEGRAM_ID || 7360769822) && (

@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import Admin from './pages/Admin';
 import Account from './pages/Account';
+import Tasks from './pages/Tasks';
 import { useEffect } from 'react';
 import WebApp from '@twa-dev/sdk';
 
@@ -22,6 +23,7 @@ export default function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/account" element={<Account />} />
+          <Route path="/tasks" element={<Tasks />} />
         </Routes>
       </div>
     </Router>

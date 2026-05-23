@@ -32,10 +32,30 @@ CREATE TABLE IF NOT EXISTS withdrawals (
   created_at timestamp with time zone DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS tasks (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  title text NOT NULL,
+  url text NOT NULL,
+  reward integer NOT NULL DEFAULT 80,
+  wait_time integer NOT NULL DEFAULT 30,
+  is_active boolean NOT NULL DEFAULT true,
+  created_at timestamp with time zone DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS user_tasks (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  telegram_id bigint NOT NULL REFERENCES users(telegram_id),
+  task_id uuid NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+  last_completed timestamp with time zone DEFAULT now(),
+  UNIQUE(telegram_id, task_id)
+);
+
 -- Disable RLS for now so the app works with Anon key, or add policies
 ALTER TABLE settings DISABLE ROW LEVEL SECURITY;
 ALTER TABLE users DISABLE ROW LEVEL SECURITY;
 ALTER TABLE withdrawals DISABLE ROW LEVEL SECURITY;
+ALTER TABLE tasks DISABLE ROW LEVEL SECURITY;
+ALTER TABLE user_tasks DISABLE ROW LEVEL SECURITY;
 
 -- Note: Since we are using an Anon Key for the MVP without authentication, 
 -- we will not enable Row Level Security (RLS) for now. 

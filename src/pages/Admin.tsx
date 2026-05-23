@@ -9,11 +9,12 @@ export default function Admin() {
   const [settings, setSettings] = useState<any>(null);
   const [withdrawals, setWithdrawals] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
+  const [tasks, setTasks] = useState<any[]>([]);
   const [broadcastMsg, setBroadcastMsg] = useState('');
   const [broadcastBtnText, setBroadcastBtnText] = useState('');
   const [broadcastBtnUrl, setBroadcastBtnUrl] = useState('');
   const [sendingBroadcast, setSendingBroadcast] = useState(false);
-  const [activeTab, setActiveTab] = useState<'settings' | 'users' | 'broadcast' | 'withdraw'>('settings');
+  const [activeTab, setActiveTab] = useState<'settings' | 'users' | 'broadcast' | 'withdraw' | 'tasks'>('settings');
 
   const telegramId = WebApp?.initDataUnsafe?.user?.id || 7360769822;
   const adminId = Number(import.meta.env.VITE_ADMIN_TELEGRAM_ID || 7360769822);
@@ -43,6 +44,14 @@ export default function Admin() {
       const { data: u, error: uErr } = await supabase.from('users').select('*').order('created_at', { ascending: false }).limit(100);
       if (uErr) console.error('Error fetching users:', uErr);
       if (u) setUsers(u);
+
+      // Fetch tasks
+      const taskRes = await supabase.from('tasks').select('*').order('created_at', { ascending: false });
+      if (taskRes.error) {
+        if (taskRes.error.code !== 'PGRST205') console.error('Error fetching tasks:', taskRes.error);
+      } else if (taskRes.data) {
+        setTasks(taskRes.data);
+      }
     } catch (err) {
       console.error('Unexpected error fetching admin data:', err);
     } finally {
@@ -78,6 +87,28 @@ export default function Admin() {
   const handleToggleBan = async (user_telegram_id: number, currentStatus: boolean) => {
     if (confirm(currentStatus ? 'Unban this user?' : 'Ban this user?')) {
       await supabase.from('users').update({ is_banned: !currentStatus }).eq('telegram_id', user_telegram_id);
+      fetchData();
+    }
+  };
+
+  const [newTask, setNewTask] = useState({ title: '', url: '', reward: 80, wait_time: 30 });
+  
+  const handleCreateTask = async () => {
+    if (!newTask.title || !newTask.url) return WebApp.showAlert('Title and URL required');
+    await supabase.from('tasks').insert([newTask]);
+    setNewTask({ title: '', url: '', reward: 80, wait_time: 30 });
+    fetchData();
+    WebApp.showAlert('Task created!');
+  };
+
+  const handleToggleTask = async (id: string, currentStatus: boolean) => {
+    await supabase.from('tasks').update({ is_active: !currentStatus }).eq('id', id);
+    fetchData();
+  };
+
+  const handleDeleteTask = async (id: string) => {
+    if (confirm('Delete this task?')) {
+      await supabase.from('tasks').delete().eq('id', id);
       fetchData();
     }
   };
@@ -143,6 +174,7 @@ export default function Admin() {
 
       <div className="flex overflow-x-auto gap-2 mb-6 pb-2 scrollbar-none">
         <button onClick={() => setActiveTab('settings')} className={`px-4 py-2 rounded-xl whitespace-nowrap text-sm font-medium ${activeTab === 'settings' ? 'bg-indigo-600 text-white' : 'bg-slate-900 text-slate-400'}`}>Settings</button>
+        <button onClick={() => setActiveTab('tasks')} className={`px-4 py-2 rounded-xl whitespace-nowrap text-sm font-medium ${activeTab === 'tasks' ? 'bg-indigo-600 text-white' : 'bg-slate-900 text-slate-400'}`}>Tasks</button>
         <button onClick={() => setActiveTab('withdraw')} className={`px-4 py-2 rounded-xl whitespace-nowrap text-sm font-medium ${activeTab === 'withdraw' ? 'bg-indigo-600 text-white' : 'bg-slate-900 text-slate-400'}`}>Withdrawals</button>
         <button onClick={() => setActiveTab('users')} className={`px-4 py-2 rounded-xl whitespace-nowrap text-sm font-medium ${activeTab === 'users' ? 'bg-indigo-600 text-white' : 'bg-slate-900 text-slate-400'}`}>Users ({users.length}+)</button>
         <button onClick={() => setActiveTab('broadcast')} className={`px-4 py-2 rounded-xl whitespace-nowrap text-sm font-medium ${activeTab === 'broadcast' ? 'bg-indigo-600 text-white' : 'bg-slate-900 text-slate-400'}`}>Broadcast</button>
@@ -270,6 +302,53 @@ export default function Admin() {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {activeTab === 'tasks' && (
+        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl animate-in fade-in zoom-in-95 duration-200">
+          <h2 className="text-lg font-bold text-white mb-6">Manage Tasks</h2>
+          
+          <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl mb-6 space-y-4">
+            <h3 className="text-sm font-bold text-slate-300">Add New Task</h3>
+            <input type="text" placeholder="Task Title (e.g. Visit our sponsor)" value={newTask.title} onChange={e => setNewTask({...newTask, title: e.target.value})} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-4 py-2 text-white text-sm" />
+            <input type="url" placeholder="URL Link" value={newTask.url} onChange={e => setNewTask({...newTask, url: e.target.value})} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-4 py-2 text-white text-sm" />
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <label className="text-xs text-slate-500 mb-1 block">Reward Coins</label>
+                <input type="number" value={newTask.reward} onChange={e => setNewTask({...newTask, reward: parseInt(e.target.value)})} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-4 py-2 text-white text-sm" />
+              </div>
+              <div className="flex-1">
+                <label className="text-xs text-slate-500 mb-1 block">Wait Time (sec)</label>
+                <input type="number" value={newTask.wait_time} onChange={e => setNewTask({...newTask, wait_time: parseInt(e.target.value)})} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-4 py-2 text-white text-sm" />
+              </div>
+            </div>
+            <button onClick={handleCreateTask} className="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2 rounded-lg font-medium text-sm">Create Task</button>
+          </div>
+
+          <div className="space-y-3">
+            {tasks.map(t => (
+              <div key={t.id} className={`border p-4 rounded-xl flex items-center justify-between ${t.is_active ? 'bg-slate-950 border-slate-800' : 'bg-slate-950/50 border-slate-800/50 opacity-60'}`}>
+                <div className="truncate pr-4 flex-1">
+                  <div className="text-white font-medium truncate">{t.title}</div>
+                  <div className="text-slate-400 text-xs mt-1 truncate">{t.url}</div>
+                  <div className="flex gap-3 mt-2 text-xs font-mono">
+                    <span className="text-indigo-400">+{t.reward} Coins</span>
+                    <span className="text-slate-500">{t.wait_time}s wait</span>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <button onClick={() => handleToggleTask(t.id, t.is_active)} className="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 text-white hover:bg-slate-700">
+                    {t.is_active ? 'Disable' : 'Enable'}
+                  </button>
+                  <button onClick={() => handleDeleteTask(t.id)} className="px-3 py-1.5 text-xs font-medium rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20">
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+            {tasks.length === 0 && <p className="text-center text-slate-500 py-4 text-sm">No tasks created yet.</p>}
+          </div>
         </div>
       )}
 
