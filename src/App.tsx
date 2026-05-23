@@ -6,7 +6,7 @@ import Tasks from './pages/Tasks';
 import History from './pages/History';
 import { useEffect } from 'react';
 import WebApp from '@twa-dev/sdk';
-import { Toaster } from 'react-hot-toast';
+import { Toaster } from 'sonner';
 import SupportWidget from './components/SupportWidget';
 
 export default function App() {
@@ -22,10 +22,11 @@ export default function App() {
   return (
     <Router>
       <div className="min-h-screen bg-slate-950 text-slate-50 font-sans font-medium selection:bg-indigo-500/30 pb-20">
-        <Toaster position="top-center" toastOptions={{
+        <Toaster position="top-center" theme="dark" toastOptions={{
           style: {
             background: '#1e293b',
             color: '#fff',
+            border: '1px solid #334155',
             borderRadius: '12px'
           }
         }} />

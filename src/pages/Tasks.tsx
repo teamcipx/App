@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase';
 import WebApp from '@twa-dev/sdk';
 import { CheckCircle, Clock, ExternalLink, ArrowLeft, Loader2, ListTodo } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 export default function Tasks() {
   const [loading, setLoading] = useState(true);

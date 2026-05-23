@@ -5,7 +5,7 @@ import { Coins, Bell, Wallet, LogOut, Loader2, Play, UserCircle, History as Hist
 import NoticeDialog from '../components/NoticeDialog';
 import WithdrawDialog from '../components/WithdrawDialog';
 import { useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);
