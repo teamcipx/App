@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { supabase } from '../lib/supabase';
-import { Settings as SettingsIcon, Users, Check, X, Loader2, Save, Send, Ban } from 'lucide-react';
+import { Settings as SettingsIcon, Users, Check, X, Loader2, Save, Send, Ban, MessageSquare, Inbox, Archive } from 'lucide-react';
 import WebApp from '@twa-dev/sdk';
+import toast from 'react-hot-toast';
 
 export default function Admin() {
   const [loading, setLoading] = useState(true);
@@ -10,12 +11,19 @@ export default function Admin() {
   const [withdrawals, setWithdrawals] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [tasks, setTasks] = useState<any[]>([]);
+  const [supportChats, setSupportChats] = useState<any[]>([]);
+  const [selectedChat, setSelectedChat] = useState<any>(null);
+  const [supportMessages, setSupportMessages] = useState<any[]>([]);
+  const [adminReply, setAdminReply] = useState('');
   const [broadcastMsg, setBroadcastMsg] = useState('');
   const [broadcastBtnText, setBroadcastBtnText] = useState('');
   const [broadcastBtnUrl, setBroadcastBtnUrl] = useState('');
   const [sendingBroadcast, setSendingBroadcast] = useState(false);
-  const [activeTab, setActiveTab] = useState<'settings' | 'users' | 'broadcast' | 'withdraw' | 'tasks'>('settings');
+  const [activeTab, setActiveTab] = useState<'settings' | 'users' | 'broadcast' | 'withdraw' | 'tasks' | 'support'>('settings');
 
+  const [chatFilter, setChatFilter] = useState<'active' | 'all'>('active');
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const telegramId = WebApp?.initDataUnsafe?.user?.id || 7360769822;
   const adminId = Number(import.meta.env.VITE_ADMIN_TELEGRAM_ID || 7360769822);
 
@@ -52,12 +60,74 @@ export default function Admin() {
       } else if (taskRes.data) {
         setTasks(taskRes.data);
       }
+
+      // Fetch chats
+      const chatsRes = await supabase.from('support_chats').select('*').order('updated_at', { ascending: false });
+      if (chatsRes.error && chatsRes.error.code !== 'PGRST205') console.error('Error fetching chats:', chatsRes.error);
+      if (chatsRes.data) setSupportChats(chatsRes.data);
+
     } catch (err) {
       console.error('Unexpected error fetching admin data:', err);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (selectedChat) {
+      fetchMessages(selectedChat.telegram_id);
+      
+      const channel = supabase
+        .channel('admin_support_messages')
+        .on('postgres_changes', { 
+          event: 'INSERT', 
+          schema: 'public', 
+          table: 'support_messages',
+          filter: `telegram_id=eq.${selectedChat.telegram_id}`
+        }, (payload) => {
+          setSupportMessages(prev => [...prev, payload.new]);
+          setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+        })
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [selectedChat]);
+
+  const fetchMessages = async (chatId: number) => {
+    const { data } = await supabase.from('support_messages').select('*').eq('telegram_id', chatId).order('created_at', { ascending: true });
+    if (data) {
+      setSupportMessages(data);
+      setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+    }
+  };
+
+  const handleAdminReply = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!adminReply.trim() || !selectedChat) return;
+
+    const text = adminReply;
+    setAdminReply('');
+
+    await supabase.from('support_messages').insert([{
+      telegram_id: selectedChat.telegram_id,
+      sender: 'admin',
+      message: text
+    }]);
+
+    await supabase.from('support_chats').update({ updated_at: new Date().toISOString() }).eq('telegram_id', selectedChat.telegram_id);
+  };
+
+  const handleChatAction = async (chatId: number, status: string) => {
+    await supabase.from('support_chats').update({ status }).eq('telegram_id', chatId);
+    fetchData(); // Refresh list
+    if (selectedChat?.telegram_id === chatId && status === 'archived') {
+      setSelectedChat(null);
+    }
+  };
+
 
   const handleUpdateSetting = (field: string, value: any) => {
     setSettings({ ...settings, [field]: value });
@@ -174,11 +244,107 @@ export default function Admin() {
 
       <div className="flex overflow-x-auto gap-2 mb-6 pb-2 scrollbar-none">
         <button onClick={() => setActiveTab('settings')} className={`px-4 py-2 rounded-xl whitespace-nowrap text-sm font-medium ${activeTab === 'settings' ? 'bg-indigo-600 text-white' : 'bg-slate-900 text-slate-400'}`}>Settings</button>
+        <button onClick={() => setActiveTab('support')} className={`px-4 py-2 rounded-xl whitespace-nowrap text-sm font-medium ${activeTab === 'support' ? 'bg-indigo-600 text-white' : 'bg-slate-900 text-slate-400 flex items-center gap-1'}`}>Inbox {supportChats.filter(c => c.status === 'active').length > 0 && <span className="w-2 h-2 rounded-full bg-red-500"></span>}</button>
         <button onClick={() => setActiveTab('tasks')} className={`px-4 py-2 rounded-xl whitespace-nowrap text-sm font-medium ${activeTab === 'tasks' ? 'bg-indigo-600 text-white' : 'bg-slate-900 text-slate-400'}`}>Tasks</button>
         <button onClick={() => setActiveTab('withdraw')} className={`px-4 py-2 rounded-xl whitespace-nowrap text-sm font-medium ${activeTab === 'withdraw' ? 'bg-indigo-600 text-white' : 'bg-slate-900 text-slate-400'}`}>Withdrawals</button>
         <button onClick={() => setActiveTab('users')} className={`px-4 py-2 rounded-xl whitespace-nowrap text-sm font-medium ${activeTab === 'users' ? 'bg-indigo-600 text-white' : 'bg-slate-900 text-slate-400'}`}>Users ({users.length}+)</button>
         <button onClick={() => setActiveTab('broadcast')} className={`px-4 py-2 rounded-xl whitespace-nowrap text-sm font-medium ${activeTab === 'broadcast' ? 'bg-indigo-600 text-white' : 'bg-slate-900 text-slate-400'}`}>Broadcast</button>
       </div>
+
+      {activeTab === 'support' && (
+        <div className="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-xl animate-in fade-in zoom-in-95 duration-200">
+          {!selectedChat ? (
+            <div className="p-0">
+              <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900">
+                <h2 className="font-bold text-white flex items-center gap-2">
+                  <Inbox className="w-5 h-5 text-indigo-400" /> Support Inbox
+                </h2>
+                <select 
+                  value={chatFilter} 
+                  onChange={(e) => setChatFilter(e.target.value as 'active' | 'all')}
+                  className="bg-slate-950 border border-slate-800 text-sm text-slate-300 rounded-lg px-2 py-1 outline-none"
+                >
+                  <option value="active">Active Only</option>
+                  <option value="all">All Chats</option>
+                </select>
+              </div>
+              <div className="divide-y divide-slate-800/50">
+                {supportChats.filter(c => chatFilter === 'all' || c.status === 'active').length === 0 ? (
+                  <p className="p-6 text-center text-slate-500">No {chatFilter === 'active' ? 'active' : ''} chats found.</p>
+                ) : (
+                  supportChats.filter(c => chatFilter === 'all' || c.status === 'active').map(c => (
+                    <div key={c.telegram_id} className={`p-4 flex gap-4 hover:bg-slate-800/50 transition-colors ${c.status === 'archived' ? 'opacity-50' : ''}`}>
+                      <div 
+                        className="flex-1 cursor-pointer"
+                        onClick={() => setSelectedChat(c)}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-bold text-slate-200">{c.telegram_id}</span>
+                          <span className="text-xs text-slate-500">{new Date(c.updated_at).toLocaleDateString()}</span>
+                        </div>
+                        <span className={`text-xs px-2 py-0.5 rounded ${c.status === 'active' ? 'bg-indigo-500/10 text-indigo-400' : 'bg-slate-800 text-slate-500'}`}>{c.status}</span>
+                      </div>
+                      <div className="flex gap-2 items-center">
+                         {c.status === 'active' && (
+                           <button onClick={() => handleChatAction(c.telegram_id, 'marked')} className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded-lg transition-colors" title="Mark as Done">
+                             <Check className="w-4 h-4" />
+                           </button>
+                         )}
+                         <button onClick={() => handleChatAction(c.telegram_id, 'archived')} className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors" title="Archive">
+                           <Archive className="w-4 h-4" />
+                         </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col h-[600px] bg-slate-950">
+              <div className="p-4 border-b border-slate-800 bg-slate-900 flex justify-between items-center">
+                <div className="flex items-center gap-3">
+                  <button onClick={() => setSelectedChat(null)} className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 transition-colors">
+                    <X className="w-5 h-5" />
+                  </button>
+                  <div>
+                    <h3 className="font-bold text-white">Chat #{selectedChat.telegram_id}</h3>
+                    <span className="text-xs text-indigo-400">{selectedChat.status}</span>
+                  </div>
+                </div>
+                <button onClick={() => handleChatAction(selectedChat.telegram_id, 'marked')} className="text-sm border border-slate-700 hover:bg-slate-800 px-3 py-1.5 rounded-lg text-slate-300 transition-colors">Mark Done</button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                {supportMessages.map((msg, i) => (
+                  <div key={i} className={`flex ${msg.sender === 'admin' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[70%] rounded-2xl px-4 py-2 text-sm ${msg.sender === 'admin' ? 'bg-indigo-600 text-white rounded-br-sm' : 'bg-slate-800 text-slate-200 rounded-bl-sm'}`}>
+                      {msg.message}
+                    </div>
+                  </div>
+                ))}
+                <div ref={messagesEndRef} />
+              </div>
+
+              <form onSubmit={handleAdminReply} className="p-4 border-t border-slate-800 bg-slate-900 flex gap-2">
+                <input 
+                  type="text"
+                  value={adminReply}
+                  onChange={e => setAdminReply(e.target.value)}
+                  placeholder="Type reply..."
+                  className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500"
+                />
+                <button 
+                  type="submit" 
+                  disabled={!adminReply.trim()}
+                  className="px-5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-500 disabled:opacity-50 transition-colors flex items-center gap-2 font-medium"
+                >
+                  <Send className="w-5 h-5" />
+                </button>
+              </form>
+            </div>
+          )}
+        </div>
+      )}
 
       {activeTab === 'settings' && (
         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl animate-in fade-in zoom-in-95 duration-200">

@@ -5,6 +5,7 @@ import { Coins, Bell, Wallet, LogOut, Loader2, Play, UserCircle, History as Hist
 import NoticeDialog from '../components/NoticeDialog';
 import WithdrawDialog from '../components/WithdrawDialog';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);
@@ -195,7 +196,7 @@ export default function Dashboard() {
         setUser({ ...user, balance: newBalance, ads_watched_today: newWatched, last_ad_date: today });
 
         setCooldown(20); // 20 seconds cooldown
-        WebApp.showAlert(`You earned ${settings.coins_per_ad} coins!`);
+        toast.success(`You earned ${settings.coins_per_ad} coins!`);
       } catch (e) {
         console.error("Error updating reward:", e);
       } finally {
@@ -220,7 +221,7 @@ export default function Dashboard() {
         const handleRewardTimer = () => {
           setAdLoading(false);
           setCooldown(20);
-          WebApp.showAlert('Ad opened! Your reward will be added in 20 seconds.');
+          toast('Ad opened! Your reward will be added in 20 seconds.', { icon: '⏳' });
           setTimeout(() => {
             rewardUser();
           }, 20000);
@@ -244,7 +245,7 @@ export default function Dashboard() {
         // Ads SDK not loaded
         setAdLoading(false);
         setCooldown(20);
-        WebApp.showAlert('Alternative Ad opened! Reward in 20 seconds.');
+        toast('Alternative Ad opened! Reward in 20 seconds.', { icon: '⏳' });
         setTimeout(() => {
           rewardUser();
         }, 20000);

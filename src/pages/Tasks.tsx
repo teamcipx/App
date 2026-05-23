@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import WebApp from '@twa-dev/sdk';
 import { CheckCircle, Clock, ExternalLink, ArrowLeft, Loader2, ListTodo } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 export default function Tasks() {
   const [loading, setLoading] = useState(true);
@@ -35,7 +36,7 @@ export default function Tasks() {
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (!document.hidden && activeTaskTimer && activeTaskTimer.timeLeft > 1) {
-        WebApp.showAlert(`You returned too early! You must stay on the webpage for the full time.`);
+        toast.error(`You returned too early! You must stay on the webpage for the full time.`);
         setFailedTasks(prev => Array.from(new Set([...prev, activeTaskTimer.id])));
         setActiveTaskTimer(null);
       }
@@ -139,11 +140,11 @@ export default function Tasks() {
       const newBalance = userBalance + task.reward;
       await supabase.from('users').update({ balance: newBalance }).eq('telegram_id', telegramId);
       
-      WebApp.showAlert(`Task Completed! You earned ${task.reward} Coins.`);
+      toast.success(`Task Completed! You earned ${task.reward} Coins.`);
       fetchTasks();
     } catch (err) {
       console.error(err);
-      WebApp.showAlert('Failed to complete task.');
+      toast.error('Failed to complete task.');
     }
   };
 
