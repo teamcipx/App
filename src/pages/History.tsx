@@ -20,15 +20,12 @@ export default function History() {
   const fetchHistory = async () => {
     setLoading(true);
     try {
-      const [wRes, utRes] = await Promise.all([
-        supabase.from('withdrawals').select('*').eq('telegram_id', telegramId).order('created_at', { ascending: false }),
-        supabase.from('user_tasks').select('id, last_completed, tasks(title, reward)').eq('telegram_id', telegramId).order('last_completed', { ascending: false })
-      ]);
+      const wRes = await supabase.from('withdrawals').select('*').eq('telegram_id', telegramId).order('created_at', { ascending: false });
+      if (wRes.data && !wRes.error) setWithdrawals(wRes.data);
 
-      if (wRes.data) setWithdrawals(wRes.data);
-      if (utRes.data && !utRes.error) {
-         setTaskHistory(utRes.data);
-      }
+      const utRes = await supabase.from('user_tasks').select('id, last_completed, tasks(title, reward)').eq('telegram_id', telegramId).order('last_completed', { ascending: false });
+      if (utRes.data && !utRes.error) setTaskHistory(utRes.data);
+
     } catch (err) {
       console.error(err);
     } finally {

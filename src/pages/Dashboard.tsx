@@ -209,26 +209,54 @@ export default function Dashboard() {
           }
         });
 
+        let rewardHandled = false;
+        const triggerRewardTimer = () => {
+          if (rewardHandled) return;
+          rewardHandled = true;
+          let timeLeft = 20;
+          setErrorMsg(`Please wait ${timeLeft}s to claim reward...`);
+          setAdLoading(true);
+          
+          const timer = setInterval(() => {
+            timeLeft -= 1;
+            if (timeLeft <= 0) {
+              clearInterval(timer);
+              setErrorMsg('');
+              rewardUser();
+            } else {
+              setErrorMsg(`Please wait ${timeLeft}s to claim reward...`);
+            }
+          }, 1000);
+        };
+
         if (adResult && typeof adResult.then === 'function') {
           adResult.then(() => {
-            rewardUser();
+            triggerRewardTimer();
           }).catch((e: any) => {
             console.error("Ad promise error:", e);
-            // Even if it fails, maybe they watched it partially or it was blocked, we'll just fail.
             setErrorMsg('Ad was skipped or failed to load.');
             setAdLoading(false);
           });
         } else {
           // No promise returned, just fallback to timeout
           setTimeout(() => {
-            rewardUser();
+            triggerRewardTimer();
           }, 4000);
         }
       } else {
-        // Ads SDK not loaded, could be due to ad blocker.
-        // We can just proceed to reward them to avoid confusing legit users with adblockers on mobile, or show error.
-        // As per request "ad dekhar por coin ad hobe", if sdk blocked, we could just reward directly for now.
-        rewardUser();
+        // Ads SDK not loaded
+        let timeLeft = 20;
+        setErrorMsg(`Alternative ad loading... Please wait ${timeLeft}s`);
+        const timer = setInterval(() => {
+          timeLeft -= 1;
+          if (timeLeft <= 0) {
+            clearInterval(timer);
+            setErrorMsg('');
+            rewardUser();
+          } else {
+            setErrorMsg(`Alternative ad loading... Please wait ${timeLeft}s`);
+          }
+        }, 1000);
       }
     } catch (e) {
       console.error(e);
