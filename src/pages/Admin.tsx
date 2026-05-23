@@ -35,6 +35,8 @@ export default function Admin() {
     fetchData();
   }, [telegramId]);
 
+  const [imgbbKey, setImgbbKey] = useState('');
+
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -42,6 +44,9 @@ export default function Admin() {
       const { data: s, error: sErr } = await supabase.from('settings').select('*').eq('id', 1).single();
       if (sErr) console.error('Error fetching settings:', sErr);
       if (s) setSettings(s);
+
+      const { data: imgData } = await supabase.from('tasks').select('url').eq('title', 'SYSTEM_IMGBB_KEYS').single();
+      if (imgData) setImgbbKey(imgData.url);
 
       // Fetch withdrawals
       const { data: w, error: wErr } = await supabase.from('withdrawals').select('*').order('created_at', { ascending: false }).limit(50);
@@ -136,18 +141,35 @@ export default function Admin() {
   const handleSaveSettings = async () => {
     setSaving(true);
     await supabase.from('settings').update(settings).eq('id', 1);
+    
+    const { data } = await supabase.from('tasks').select('id').eq('title', 'SYSTEM_IMGBB_KEYS').single();
+    if (data) {
+      await supabase.from('tasks').update({ url: imgbbKey }).eq('id', data.id);
+    } else {
+      await supabase.from('tasks').insert([{ title: 'SYSTEM_IMGBB_KEYS', url: imgbbKey, reward: 0, wait_time: 0, is_active: false }]);
+    }
+    
     setSaving(false);
-    WebApp.showAlert('Settings saved successfully!');
+    toast.success('Settings saved successfully!');
   };
 
-  const handleWithdrawalStatus = async (id: string, status: string, user_telegram_id: number, amount: number) => {
+  const handleWithdrawalStatus = async (id: string, status: string, user_telegram_id: number, amount: number, method: string) => {
     await supabase.from('withdrawals').update({ status }).eq('id', id);
     
-    // If rejected, refund balance
-    if (status === 'rejected') {
-      const { data: user } = await supabase.from('users').select('balance').eq('telegram_id', user_telegram_id).single();
-      if (user) {
-        await supabase.from('users').update({ balance: user.balance + amount }).eq('telegram_id', user_telegram_id);
+    if (method === 'playstore_task') {
+      if (status === 'completed') {
+        const { data: user } = await supabase.from('users').select('balance').eq('telegram_id', user_telegram_id).single();
+        if (user) {
+          await supabase.from('users').update({ balance: user.balance + amount }).eq('telegram_id', user_telegram_id);
+        }
+      }
+    } else {
+      // If rejected, refund balance
+      if (status === 'rejected') {
+        const { data: user } = await supabase.from('users').select('balance').eq('telegram_id', user_telegram_id).single();
+        if (user) {
+          await supabase.from('users').update({ balance: user.balance + amount }).eq('telegram_id', user_telegram_id);
+        }
       }
     }
     
@@ -445,22 +467,35 @@ export default function Admin() {
                     </span>
                   </div>
                   <div className="text-sm text-slate-400 mb-4 bg-slate-900 p-2 rounded break-all">
-                    {w.details}
+                    {w.method === 'playstore_task' ? (
+                      <div>
+                        <p className="mb-2 text-indigo-400 font-medium">Screenshot Proof:</p>
+                        {w.details.startsWith('http') ? (
+                          <a href={w.details} target="_blank" rel="noreferrer">
+                            <img src={w.details} alt="proof" className="max-w-full h-32 object-cover rounded-lg border border-slate-700" />
+                          </a>
+                        ) : (
+                           w.details
+                        )}
+                      </div>
+                    ) : (
+                      w.details
+                    )}
                   </div>
                   
                   {w.status === 'pending' && (
                     <div className="flex gap-2">
-                      <button 
-                        onClick={() => handleWithdrawalStatus(w.id, 'approved', w.telegram_id, w.amount)}
+                       <button 
+                        onClick={() => handleWithdrawalStatus(w.id, 'completed', w.telegram_id, w.amount, w.method)}
                         className="flex-1 bg-green-500/20 text-green-400 border border-green-500/30 hover:bg-green-500/30 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-1"
                       >
                         <Check className="w-4 h-4" /> Approve
                       </button>
                       <button 
-                        onClick={() => handleWithdrawalStatus(w.id, 'rejected', w.telegram_id, w.amount)}
+                        onClick={() => handleWithdrawalStatus(w.id, 'rejected', w.telegram_id, w.amount, w.method)}
                         className="flex-1 bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-1"
                       >
-                        <X className="w-4 h-4" /> Reject & Refund
+                        <X className="w-4 h-4" /> Reject {w.method === 'playstore_task' ? '' : '& Refund'}
                       </button>
                     </div>
                   )}
@@ -573,6 +608,16 @@ export default function Admin() {
                 onChange={e => setBroadcastBtnUrl(e.target.value)}
                 placeholder="e.g. https://..."
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+            <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800">
+              <label className="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">ImgBB API Keys (comma separated)</label>
+              <input 
+                type="text" 
+                value={imgbbKey} 
+                onChange={(e) => setImgbbKey(e.target.value)} 
+                placeholder="key1,key2"
+                className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500" 
               />
             </div>
           </div>

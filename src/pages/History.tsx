@@ -31,8 +31,8 @@ export default function History() {
       if (utRes.data && !utRes.error) {
          const formattedTasks = utRes.data.map(t => ({
            id: `task_${t.id}`,
-           title: t.tasks?.title || 'Unknown Task',
-           reward: t.tasks?.reward || 0,
+           title: (t.tasks as any)?.title || 'Unknown Task',
+           reward: (t.tasks as any)?.reward || 0,
            date: t.last_completed,
            type: 'task'
          }));

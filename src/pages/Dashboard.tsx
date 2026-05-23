@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import WebApp from '@twa-dev/sdk';
-import { Coins, Bell, Wallet, LogOut, Loader2, Play, UserCircle, History as HistoryIcon } from 'lucide-react';
+import { Coins, Bell, Wallet, LogOut, Loader2, Play, UserCircle, History as HistoryIcon, Trophy } from 'lucide-react';
 import NoticeDialog from '../components/NoticeDialog';
 import WithdrawDialog from '../components/WithdrawDialog';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import SupportWidget from '../components/SupportWidget';
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);
@@ -72,11 +73,34 @@ export default function Dashboard() {
       const { data: userData, error: userError } = await supabase.from('users').select('*').eq('telegram_id', telegramId).single();
       
       if (userData) {
-        // Check if day changed to reset ad count
+        // Parse custom user state
+        let customState = { date: '', spinsToday: 0, lastSpinTime: 0, scratchesToday: 0 };
+        try {
+          if (userData.last_ad_date.startsWith('{')) {
+            customState = JSON.parse(userData.last_ad_date);
+          } else {
+            customState.date = userData.last_ad_date;
+          }
+        } catch(e) {}
+
         const today = new Date().toISOString().split('T')[0];
-        if (userData.last_ad_date !== today) {
-          await supabase.from('users').update({ ads_watched_today: 0, last_ad_date: today }).eq('telegram_id', telegramId);
+        let needsUpdate = false;
+        
+        if (customState.date !== today) {
+          customState.date = today;
+          customState.spinsToday = 0;
+          customState.scratchesToday = 0;
           userData.ads_watched_today = 0;
+          needsUpdate = true;
+        }
+
+        userData.customState = customState;
+
+        if (needsUpdate) {
+          await supabase.from('users').update({ 
+            ads_watched_today: 0, 
+            last_ad_date: JSON.stringify(customState) 
+          }).eq('telegram_id', telegramId);
         }
         setUser(userData);
       } else {
@@ -87,6 +111,7 @@ export default function Dashboard() {
         
         // Create user
         const today = new Date().toISOString().split('T')[0];
+        const newCustomState = { date: today, spinsToday: 0, lastSpinTime: 0, scratchesToday: 0 };
         let initialBalance = 0;
         let referredBy = null;
 
@@ -96,9 +121,8 @@ export default function Dashboard() {
           if (!isNaN(referrerId)) {
             const { data: referrer, error: refErr } = await supabase.from('users').select('*').eq('telegram_id', referrerId).single();
             if (referrer) {
-               // Referrer gets 500
                await supabase.from('users').update({ balance: referrer.balance + 500 }).eq('telegram_id', referrerId);
-               initialBalance = 500; // New user gets 500
+               initialBalance = 500; 
                referredBy = referrerId;
             }
           }
@@ -108,7 +132,7 @@ export default function Dashboard() {
           telegram_id: telegramId, 
           balance: initialBalance, 
           ads_watched_today: 0, 
-          last_ad_date: today 
+          last_ad_date: JSON.stringify(newCustomState) 
         };
         
         if (referredBy) {
@@ -174,13 +198,14 @@ export default function Dashboard() {
       try {
         const newBalance = user.balance + settings.coins_per_ad;
         const newWatched = user.ads_watched_today + 1;
-        const today = new Date().toISOString().split('T')[0];
+        
+        const stateToSave = { ...user.customState };
         
         // Update user balance
         await supabase.from('users').update({
           balance: newBalance,
           ads_watched_today: newWatched,
-          last_ad_date: today
+          last_ad_date: JSON.stringify(stateToSave)
         }).eq('telegram_id', telegramId);
         
         // Log ad history (ignore errors if table doesn't exist yet)
@@ -193,7 +218,7 @@ export default function Dashboard() {
           console.error("Ad history logging failed:", adErr);
         }
 
-        setUser({ ...user, balance: newBalance, ads_watched_today: newWatched, last_ad_date: today });
+        setUser({ ...user, balance: newBalance, ads_watched_today: newWatched, customState: stateToSave });
 
         setCooldown(20); // 20 seconds cooldown
         toast.success(`You earned ${settings.coins_per_ad} coins!`);
@@ -264,6 +289,12 @@ export default function Dashboard() {
   return (
     <div className="p-4 max-w-lg mx-auto relative">
       <div className="absolute top-4 right-4 flex items-center gap-2">
+        <button 
+          onClick={() => navigate('/leaderboard')}
+          className="p-2 bg-slate-900 border border-slate-800 rounded-full text-slate-300 hover:text-yellow-500 transition-colors"
+        >
+          <Trophy className="w-6 h-6" /> 
+        </button>
         <button 
           onClick={() => navigate('/history')}
           className="p-2 bg-slate-900 border border-slate-800 rounded-full text-slate-300 hover:text-white transition-colors"
@@ -380,8 +411,32 @@ export default function Dashboard() {
             </div>
             <span className="bg-indigo-500/20 text-indigo-400 text-xs px-2 py-1 rounded-lg">Earn Extra</span>
           </button>
+          <div className="grid grid-cols-2 gap-4">
+            <button
+              onClick={() => navigate('/spin')}
+              className="bg-slate-900 border border-slate-800 hover:bg-slate-800 text-white p-4 rounded-3xl font-bold flex flex-col items-center justify-center gap-3 transition-all active:scale-[0.98]"
+            >
+              <div className="p-3 bg-purple-500/10 text-purple-400 rounded-full">
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+              </div>
+              <span className="text-sm">Spin Wheel</span>
+            </button>
+            <button
+              onClick={() => navigate('/scratch')}
+              className="bg-slate-900 border border-slate-800 hover:bg-slate-800 text-white p-4 rounded-3xl font-bold flex flex-col items-center justify-center gap-3 transition-all active:scale-[0.98]"
+            >
+              <div className="p-3 bg-amber-500/10 text-amber-500 rounded-full">
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
+              </div>
+              <span className="text-sm">Scratch Card</span>
+            </button>
+          </div>
         </div>
       )}
+
+      <div className="mt-8">
+        <SupportWidget />
+      </div>
 
       {user?.telegram_id === Number(import.meta.env.VITE_ADMIN_TELEGRAM_ID || 7360769822) && (
         <div className="mt-8 pt-6 border-t border-slate-900 text-center">

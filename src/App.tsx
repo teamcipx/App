@@ -9,6 +9,11 @@ import WebApp from '@twa-dev/sdk';
 import { Toaster } from 'sonner';
 import SupportWidget from './components/SupportWidget';
 
+import Leaderboard from './pages/Leaderboard';
+
+import Spin from './pages/Spin';
+import Scratch from './pages/Scratch';
+
 export default function App() {
   useEffect(() => {
     try {
@@ -35,9 +40,11 @@ export default function App() {
           <Route path="/admin" element={<Admin />} />
           <Route path="/account" element={<Account />} />
           <Route path="/tasks" element={<Tasks />} />
+          <Route path="/leaderboard" element={<Leaderboard />} />
+          <Route path="/spin" element={<Spin />} />
+          <Route path="/scratch" element={<Scratch />} />
           <Route path="/history" element={<History />} />
         </Routes>
-        <SupportWidget />
       </div>
     </Router>
   );

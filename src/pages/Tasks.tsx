@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import WebApp from '@twa-dev/sdk';
-import { CheckCircle, Clock, ExternalLink, ArrowLeft, Loader2, ListTodo } from 'lucide-react';
+import { CheckCircle, Clock, ExternalLink, ArrowLeft, Loader2, ListTodo, Upload } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -9,10 +9,15 @@ export default function Tasks() {
   const [loading, setLoading] = useState(true);
   const [tasks, setTasks] = useState<any[]>([]);
   const [userTasks, setUserTasks] = useState<any[]>([]);
+  const [imgbbKeys, setImgbbKeys] = useState<string[]>([]);
   const [activeTaskTimer, setActiveTaskTimer] = useState<{ id: string, timeLeft: number } | null>(null);
   const [failedTasks, setFailedTasks] = useState<string[]>([]);
   const [userBalance, setUserBalance] = useState(0);
+  const [uploadingTask, setUploadingTask] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
   const telegramId = WebApp?.initDataUnsafe?.user?.id || 7360769822; // Fallback for dev
 
@@ -49,19 +54,24 @@ export default function Tasks() {
   const fetchTasks = async () => {
     setLoading(true);
     try {
-      const [{ data: user }, taskRes, utRes] = await Promise.all([
+      const [{ data: user }, taskRes, utRes, imgbbData] = await Promise.all([
         supabase.from('users').select('balance').eq('telegram_id', telegramId).single(),
         supabase.from('tasks').select('*').eq('is_active', true).order('created_at', { ascending: false }),
-        supabase.from('user_tasks').select('*').eq('telegram_id', telegramId)
+        supabase.from('user_tasks').select('*').eq('telegram_id', telegramId),
+        supabase.from('tasks').select('url').eq('title', 'SYSTEM_IMGBB_KEYS').single()
       ]);
 
       if (user) setUserBalance(user.balance);
       
+      if (imgbbData.data && imgbbData.data.url) {
+         setImgbbKeys(imgbbData.data.url.split(',').map((k: string) => k.trim()));
+      }
+
       // If tables don't exist yet, don't crash
       if (taskRes.error && taskRes.error.code === 'PGRST205') {
         console.warn('Tasks table not created yet');
       } else if (taskRes.data) {
-        setTasks(taskRes.data);
+        setTasks(taskRes.data.filter((t: any) => t.title !== 'SYSTEM_IMGBB_KEYS'));
       }
 
       if (utRes.error && utRes.error.code === 'PGRST205') {
@@ -108,6 +118,12 @@ export default function Tasks() {
   };
 
   const handleStartTask = (task: any) => {
+    if (task.title.includes('[PLAYSTORE]')) {
+      setSelectedTaskId(task.id);
+      fileInputRef.current?.click();
+      return;
+    }
+
     // Open URL
     if (WebApp.openLink) {
       WebApp.openLink(task.url);
@@ -117,6 +133,75 @@ export default function Tasks() {
     
     // Start Timer
     setActiveTaskTimer({ id: task.id, timeLeft: task.wait_time });
+  };
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !selectedTaskId) return;
+
+    if (imgbbKeys.length === 0) {
+      toast.error('Image upload is not configured. Please contact admin.');
+      return;
+    }
+
+    const task = tasks.find(t => t.id === selectedTaskId);
+    if (!task) return;
+
+    setUploadingTask(task.id);
+    const formData = new FormData();
+    formData.append('image', file);
+
+    let success = false;
+    let uploadedUrl = '';
+
+    for (const key of imgbbKeys) {
+      try {
+        const response = await fetch(`https://api.imgbb.com/1/upload?key=${key}`, {
+          method: 'POST',
+          body: formData
+        });
+        const data = await response.json();
+        if (data.success) {
+          success = true;
+          uploadedUrl = data.data.url;
+          break;
+        }
+      } catch (err) {
+        console.error('ImgBB upload error with key:', key, err);
+      }
+    }
+
+    if (!success) {
+      toast.error('Failed to upload image. Please try again later.');
+      setUploadingTask(null);
+      return;
+    }
+
+    // Insert into withdrawals for manual review
+    try {
+      await supabase.from('withdrawals').insert([{
+        telegram_id: telegramId,
+        method: 'playstore_task',
+        details: uploadedUrl,
+        amount: task.reward
+      }]);
+
+      // Add to user tasks so it goes to "cooldown"
+      await supabase.from('user_tasks').insert([{
+        telegram_id: telegramId,
+        task_id: task.id
+      }]);
+
+      toast.success('Screenshot uploaded! Your reward is pending review.');
+      fetchTasks();
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to submit proof.');
+    } finally {
+      setUploadingTask(null);
+      setSelectedTaskId(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
   };
 
   const handleCompleteTask = async (taskId: string) => {
@@ -161,6 +246,14 @@ export default function Tasks() {
         <h1 className="text-2xl font-bold text-white">Daily Tasks</h1>
       </div>
 
+      <input 
+        type="file" 
+        accept="image/*" 
+        ref={fileInputRef} 
+        onChange={handleImageChange} 
+        style={{ display: 'none' }} 
+      />
+
       <div className="space-y-4">
         {tasks.map(task => {
           const { status, timeRemaining } = getTaskStatus(task.id);
@@ -191,9 +284,14 @@ export default function Tasks() {
                       <button disabled className="w-full bg-slate-800 text-indigo-400 py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2">
                         <Loader2 className="w-4 h-4 animate-spin" /> Verifying... {activeTaskTimer.timeLeft}s
                       </button>
+                    ) : uploadingTask === task.id ? (
+                      <button disabled className="w-full bg-slate-800 text-indigo-400 py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin" /> Uploading proof...
+                      </button>
                     ) : (
                       <button onClick={() => handleStartTask(task)} className={`w-full ${isFailed ? 'bg-amber-600 hover:bg-amber-500' : 'bg-indigo-600 hover:bg-indigo-500'} text-white py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-transform active:scale-[0.98]`}>
-                        {isFailed ? 'Resume Task' : 'Start Task'} <ExternalLink className="w-4 h-4" />
+                        {task.title.includes('[PLAYSTORE]') ? 'Upload Screenshot' : isFailed ? 'Resume Task' : 'Start Task'} 
+                        {task.title.includes('[PLAYSTORE]') ? <Upload className="w-4 h-4" /> : <ExternalLink className="w-4 h-4" />}
                       </button>
                     )
                   ) : (
