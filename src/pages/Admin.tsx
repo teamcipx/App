@@ -340,6 +340,11 @@ export default function Admin() {
                 {supportMessages.map((msg, i) => (
                   <div key={i} className={`flex ${msg.sender === 'admin' ? 'justify-end' : 'justify-start'}`}>
                     <div className={`max-w-[70%] rounded-2xl px-4 py-2 text-sm ${msg.sender === 'admin' ? 'bg-indigo-600 text-white rounded-br-sm' : 'bg-slate-800 text-slate-200 rounded-bl-sm'}`}>
+                      {msg.image_url && (
+                        <div className="mb-2">
+                          <img src={msg.image_url} alt="Attachment" className="max-w-full rounded-lg object-cover cursor-pointer hover:opacity-90" onClick={() => window.open(msg.image_url, '_blank')} />
+                        </div>
+                      )}
                       {msg.message}
                     </div>
                   </div>

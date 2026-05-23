@@ -54,6 +54,10 @@ export default function Reviews() {
         if (!isAdmin) {
           visibleReviews = revRes.data.filter(r => r.telegram_id === telegramId || r.is_admin_post);
         }
+        
+        // Shuffle the reviews
+        visibleReviews = visibleReviews.sort(() => Math.random() - 0.5);
+        
         setReviews(visibleReviews);
       }
     } finally {
@@ -163,7 +167,10 @@ export default function Reviews() {
 
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-white mb-2">Payment Proofs & Reviews</h1>
-        <p className="text-slate-400 text-sm">See what other users are saying about xN Coin!</p>
+        <div className="flex items-center justify-between">
+          <p className="text-slate-400 text-sm">See what other users are saying about xN Coin!</p>
+          {!loading && <span className="bg-slate-800 text-slate-300 text-xs px-2 py-1 rounded-md font-medium">Total Reviews: {reviews.length}</span>}
+        </div>
       </div>
 
       {loading ? (

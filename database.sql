@@ -62,6 +62,7 @@ CREATE TABLE IF NOT EXISTS support_messages (
   telegram_id bigint NOT NULL REFERENCES support_chats(telegram_id),
   sender text NOT NULL, -- 'user', 'admin'
   message text NOT NULL,
+  image_url text,
   created_at timestamp with time zone DEFAULT now()
 );
 

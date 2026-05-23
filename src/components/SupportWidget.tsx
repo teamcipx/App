@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageSquare, Send, X } from 'lucide-react';
+import { MessageSquare, Send, X, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import WebApp from '@twa-dev/sdk';
+import { toast } from 'sonner';
 
 export default function SupportWidget() {
   const [isOpen, setIsOpen] = useState(false);
@@ -9,7 +10,21 @@ export default function SupportWidget() {
   const [newMessage, setNewMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
+  const [imgbbKeys, setImgbbKeys] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   const telegramId = WebApp?.initDataUnsafe?.user?.id || 7360769822;
+
+  useEffect(() => {
+    const fetchKeys = async () => {
+      const { data } = await supabase.from('tasks').select('url').eq('title', 'SYSTEM_IMGBB_KEYS').single();
+      if (data && data.url) {
+        setImgbbKeys(data.url.split(',').map((k: string) => k.trim()));
+      }
+    };
+    fetchKeys();
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -44,6 +59,67 @@ export default function SupportWidget() {
       .eq('telegram_id', telegramId)
       .order('created_at', { ascending: true });
     if (data) setMessages(data);
+  };
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (imgbbKeys.length === 0) {
+      toast.error('Image upload is not configured.');
+      return;
+    }
+
+    setUploading(true);
+    let uploadedUrl = null;
+    
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    let success = false;
+    for (const key of imgbbKeys) {
+      try {
+        const response = await fetch(`https://api.imgbb.com/1/upload?key=${key}`, {
+          method: 'POST',
+          body: formData
+        });
+        const data = await response.json();
+        if (data.success) {
+          success = true;
+          uploadedUrl = data.data.url;
+          break;
+        }
+      } catch (err) {
+        console.error('ImgBB upload error with key:', key, err);
+      }
+    }
+
+    if (!success) {
+      toast.error('Failed to upload image.');
+      setUploading(false);
+      return;
+    }
+
+    // Check if chat is archived
+    const { data: chatData } = await supabase.from('support_chats').select('status').eq('telegram_id', telegramId).single();
+    
+    if (chatData?.status !== 'archived') {
+      await supabase.from('support_chats').upsert([{ 
+        telegram_id: telegramId, 
+        status: 'active',
+        updated_at: new Date().toISOString()
+      }], { onConflict: 'telegram_id' });
+    }
+
+    await supabase.from('support_messages').insert([{
+      telegram_id: telegramId,
+      sender: 'user',
+      message: 'Attached Image',
+      image_url: uploadedUrl
+    }]);
+
+    setUploading(false);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleSend = async (e: React.FormEvent) => {
@@ -114,6 +190,9 @@ export default function SupportWidget() {
                   ? 'bg-indigo-600 text-white rounded-br-sm' 
                   : 'bg-slate-800 text-slate-200 rounded-bl-sm'
                 }`}>
+                  {msg.image_url && (
+                    <img src={msg.image_url} alt="Attachment" className="max-w-full rounded-lg mb-2 object-cover" />
+                  )}
                   {msg.message}
                 </div>
               </div>
@@ -121,7 +200,22 @@ export default function SupportWidget() {
             <div ref={messagesEndRef} />
           </div>
 
-          <form onSubmit={handleSend} className="p-3 border-t border-slate-800 bg-slate-900 sm:rounded-b-2xl flex gap-2">
+          <form onSubmit={handleSend} className="p-3 border-t border-slate-800 bg-slate-900 sm:rounded-b-2xl flex gap-2 items-center">
+            <input 
+              type="file" 
+              accept="image/*" 
+              ref={fileInputRef} 
+              onChange={handleImageChange} 
+              className="hidden" 
+            />
+            <button 
+              type="button"
+              disabled={uploading}
+              onClick={() => fileInputRef.current?.click()}
+              className="text-slate-400 hover:text-indigo-400 p-2 transition-colors"
+            >
+               {uploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ImageIcon className="w-5 h-5" />}
+            </button>
             <input 
               type="text"
               value={newMessage}
