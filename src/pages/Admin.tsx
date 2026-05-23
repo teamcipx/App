@@ -104,15 +104,15 @@ export default function Admin() {
       });
       
       const result = await response.json();
-      if (result.success) {
+      if (response.ok && result.success) {
         WebApp.showAlert(`Message sent to ${result.successCount} users. Failed: ${result.failCount}`);
         setBroadcastMsg('');
       } else {
-        WebApp.showAlert('Failed to send broadcast');
+        WebApp.showAlert(`Failed: ${result.error || 'Server error'} (Status: ${response.status})`);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      WebApp.showAlert('Error sending broadcast');
+      WebApp.showAlert(`Error sending broadcast: ${err.message}`);
     } finally {
       setSendingBroadcast(false);
     }

@@ -27,7 +27,7 @@ if (token) {
     // the start_param is actually sent via direct bot attachments or menu button.
     // Assuming the user just configures their bot link as https://t.me/BotName?startapp=X
     
-    const appUrl = process.env.APP_URL || 'https://example.com'; 
+    const appUrl = process.env.APP_URL || 'https://nxpost.online'; 
     const finalUrl = startParam ? `${appUrl}?startapp=${startParam}` : appUrl;
     
     let welcomeMessage = `🎉 Welcome to xN Coin Bot! 🪙\n\nWatch ads, complete tasks, and earn coins effortlessly! Convert your coins to real money.\n\nClick the button below to start earning now! 🚀`;
