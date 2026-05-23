@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageSquare, Send } from 'lucide-react';
+import { MessageSquare, Send, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import WebApp from '@twa-dev/sdk';
 
 export default function SupportWidget() {
+  const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -11,28 +12,30 @@ export default function SupportWidget() {
   const telegramId = WebApp?.initDataUnsafe?.user?.id || 7360769822;
 
   useEffect(() => {
-    fetchMessages();
-    // Subscribe to new messages
-    const channel = supabase
-      .channel('support_messages')
-      .on('postgres_changes', { 
-        event: 'INSERT', 
-        schema: 'public', 
-        table: 'support_messages',
-        filter: `telegram_id=eq.${telegramId}`
-      }, (payload) => {
-        setMessages(prev => [...prev, payload.new]);
-      })
-      .subscribe();
+    if (isOpen) {
+      fetchMessages();
+      // Subscribe to new messages
+      const channel = supabase
+        .channel('support_messages')
+        .on('postgres_changes', { 
+          event: 'INSERT', 
+          schema: 'public', 
+          table: 'support_messages',
+          filter: `telegram_id=eq.${telegramId}`
+        }, (payload) => {
+          setMessages(prev => [...prev, payload.new]);
+        })
+        .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [telegramId]);
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [isOpen, telegramId]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, isOpen]);
 
   const fetchMessages = async () => {
     const { data } = await supabase
@@ -73,53 +76,69 @@ export default function SupportWidget() {
   }
 
   return (
-    <div className="w-full bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-xl flex flex-col h-[400px]">
-      <div className="flex items-center justify-between p-4 border-b border-slate-800 bg-slate-900">
-        <div>
-          <h3 className="font-bold text-white flex items-center gap-2">
-            <MessageSquare className="w-4 h-4 text-indigo-400" />
-            Support Chat
-          </h3>
-          <p className="text-xs text-slate-400 mt-1">We usually reply within a few hours.</p>
-        </div>
-      </div>
-
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 flex flex-col bg-slate-950">
-        {messages.length === 0 && (
-          <div className="flex-1 flex items-center justify-center text-center p-4">
-            <p className="text-slate-500 text-sm">Send us a message and we'll get back to you soon.</p>
-          </div>
-        )}
-        {messages.map((msg, i) => (
-          <div key={i} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[80%] rounded-2xl px-4 py-2 text-sm ${
-              msg.sender === 'user' 
-              ? 'bg-indigo-600 text-white rounded-br-sm' 
-              : 'bg-slate-800 text-slate-200 rounded-bl-sm'
-            }`}>
-              {msg.message}
-            </div>
-          </div>
-        ))}
-        <div ref={messagesEndRef} />
-      </div>
-
-      <form onSubmit={handleSend} className="p-3 border-t border-slate-800 bg-slate-900 flex gap-2">
-        <input 
-          type="text"
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          placeholder="Type your message..."
-          className="flex-1 bg-slate-950 text-white border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500"
-        />
+    <>
+      {!isOpen && (
         <button 
-          type="submit" 
-          disabled={!newMessage.trim()}
-          className="bg-indigo-600 text-white p-2.5 rounded-xl hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+          onClick={() => setIsOpen(true)}
+          className="fixed bottom-24 right-4 sm:bottom-6 sm:right-6 p-4 bg-indigo-600 text-white rounded-full shadow-lg hover:bg-indigo-500 transition-transform active:scale-95 z-50 flex items-center justify-center"
         >
-          <Send className="w-5 h-5" />
+          <MessageSquare className="w-6 h-6" />
         </button>
-      </form>
-    </div>
+      )}
+
+      {isOpen && (
+        <div className="fixed bottom-0 right-0 w-full sm:w-[350px] sm:bottom-6 sm:right-6 bg-slate-900 border-t sm:border border-slate-800 sm:rounded-2xl shadow-2xl flex flex-col z-50 h-[70vh] sm:h-[500px] animate-in slide-in-from-bottom-5">
+          <div className="flex items-center justify-between p-4 border-b border-slate-800 bg-slate-900 sm:rounded-t-2xl">
+            <div>
+              <h3 className="font-bold text-white flex items-center gap-2">
+                <MessageSquare className="w-4 h-4 text-indigo-400" />
+                Support Chat
+              </h3>
+              <p className="text-xs text-slate-400 mt-1">We usually reply within a few hours.</p>
+            </div>
+            <button onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-white p-2">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 flex flex-col bg-slate-950">
+            {messages.length === 0 && (
+              <div className="flex-1 flex items-center justify-center text-center p-4">
+                <p className="text-slate-500 text-sm">Send us a message and we'll get back to you soon.</p>
+              </div>
+            )}
+            {messages.map((msg, i) => (
+              <div key={i} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[80%] rounded-2xl px-4 py-2 text-sm ${
+                  msg.sender === 'user' 
+                  ? 'bg-indigo-600 text-white rounded-br-sm' 
+                  : 'bg-slate-800 text-slate-200 rounded-bl-sm'
+                }`}>
+                  {msg.message}
+                </div>
+              </div>
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+
+          <form onSubmit={handleSend} className="p-3 border-t border-slate-800 bg-slate-900 sm:rounded-b-2xl flex gap-2">
+            <input 
+              type="text"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              placeholder="Type your message..."
+              className="flex-1 bg-slate-950 text-white border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500"
+            />
+            <button 
+              type="submit" 
+              disabled={!newMessage.trim()}
+              className="bg-indigo-600 text-white p-2.5 rounded-xl hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+            >
+              <Send className="w-5 h-5" />
+            </button>
+          </form>
+        </div>
+      )}
+    </>
   );
 }

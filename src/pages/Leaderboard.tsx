@@ -1,15 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { ArrowLeft, Trophy, Users, Loader2 } from 'lucide-react';
+import { ArrowLeft, Trophy, Users, Loader2, Gift } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import WebApp from '@twa-dev/sdk';
+import { toast } from 'sonner';
 
 export default function Leaderboard() {
   const [loading, setLoading] = useState(true);
   const [leaders, setLeaders] = useState<any[]>([]);
+  const [userReferrals, setUserReferrals] = useState(0);
+  const [claiming, setClaiming] = useState(false);
+  const [hasClaimed, setHasClaimed] = useState(false);
   const navigate = useNavigate();
 
   const telegramId = WebApp?.initDataUnsafe?.user?.id || 7360769822;
+  const TARGET_REFERRALS = 30;
+  const BONUS_COINS = 10000;
 
   useEffect(() => {
     fetchLeaderboard();
@@ -17,6 +23,18 @@ export default function Leaderboard() {
 
   const fetchLeaderboard = async () => {
     try {
+      const { data: currentUser } = await supabase.from('users').select('last_ad_date').eq('telegram_id', telegramId).single();
+      
+      let customState = { date: '', spinsToday: 0, lastSpinTime: 0, scratchesToday: 0, referralBonusClaimed: false };
+      if (currentUser?.last_ad_date) {
+        try {
+           if (currentUser.last_ad_date.startsWith('{')) {
+             customState = { ...customState, ...JSON.parse(currentUser.last_ad_date) };
+           }
+        } catch(e) {}
+      }
+      setHasClaimed(customState.referralBonusClaimed);
+
       // 1. Fetch all users to calculate referrals locally
       const { data, error } = await supabase.from('users').select('telegram_id, referred_by');
       if (error) throw error;
@@ -30,6 +48,8 @@ export default function Leaderboard() {
           refCounts[user.referred_by] = (refCounts[user.referred_by] || 0) + 1;
         }
       });
+
+      setUserReferrals(refCounts[telegramId] || 0);
 
       // 2. Sort to get top
       const sorted = Object.entries(refCounts)
@@ -46,9 +66,51 @@ export default function Leaderboard() {
     }
   };
 
+  const handleClaimBonus = async () => {
+    if (userReferrals < TARGET_REFERRALS) {
+      toast.error(`You need ${TARGET_REFERRALS} referrals to claim this bonus!`);
+      return;
+    }
+    
+    if (hasClaimed) {
+       toast.error('Bonus already claimed!');
+       return;
+    }
+
+    setClaiming(true);
+    try {
+       const { data: user } = await supabase.from('users').select('*').eq('telegram_id', telegramId).single();
+       if (!user) throw new Error('User not found');
+       
+       let customState = { date: '', spinsToday: 0, lastSpinTime: 0, scratchesToday: 0, referralBonusClaimed: false };
+       try {
+         if (user.last_ad_date.startsWith('{')) {
+           customState = { ...customState, ...JSON.parse(user.last_ad_date) };
+         }
+       } catch(e) {}
+       
+       customState.referralBonusClaimed = true;
+       
+       await supabase.from('users').update({
+         balance: user.balance + BONUS_COINS,
+         last_ad_date: JSON.stringify(customState)
+       }).eq('telegram_id', telegramId);
+       
+       setHasClaimed(true);
+       toast.success(`Congratulations! You claimed ${BONUS_COINS} coins!`);
+    } catch(err) {
+       console.error(err);
+       toast.error('Failed to claim bonus.');
+    } finally {
+       setClaiming(false);
+    }
+  };
+
+  const progressPercentage = Math.min((userReferrals / TARGET_REFERRALS) * 100, 100);
+
   return (
     <div className="p-4 max-w-lg mx-auto relative min-h-screen">
-      <div className="flex items-center gap-3 mb-8 pt-2">
+      <div className="flex items-center gap-3 mb-6 pt-2">
         <button 
           onClick={() => navigate('/')}
           className="p-2 bg-slate-900 border border-slate-800 rounded-full text-slate-300 hover:text-white transition-colors"
@@ -64,45 +126,92 @@ export default function Leaderboard() {
       {loading ? (
         <div className="flex justify-center p-10"><Loader2 className="w-8 h-8 animate-spin text-indigo-500" /></div>
       ) : (
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-xl">
-           <div className="p-6 text-center border-b border-slate-800 bg-slate-900/50">
-             <Trophy className="w-16 h-16 text-yellow-500 mx-auto mb-3" />
-             <h2 className="text-xl font-bold text-white">Top Referrers</h2>
-             <p className="text-sm text-slate-400 mt-1">Invite friends to climb the leaderboard!</p>
-           </div>
-           
-           <div className="divide-y divide-slate-800/50">
-             {leaders.length === 0 ? (
-               <div className="p-8 text-center text-slate-500">
-                 No referrals yet. Be the first!
-               </div>
-             ) : (
-               leaders.map((leader, index) => (
-                 <div key={leader.id} className={`p-4 flex items-center gap-4 ${leader.id === telegramId ? 'bg-indigo-500/10' : ''}`}>
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
-                      index === 0 ? 'bg-yellow-500/20 text-yellow-500' :
-                      index === 1 ? 'bg-slate-400/20 text-slate-300' :
-                      index === 2 ? 'bg-amber-700/20 text-amber-600' :
-                      'bg-slate-800 text-slate-500'
-                    }`}>
-                      {index + 1}
-                    </div>
-                    
-                    <div className="flex-1">
-                      <p className="font-bold text-white flex items-center gap-2">
-                        {leader.id === telegramId ? 'You' : `User ${leader.id.toString().slice(0, 4)}...`}
-                      </p>
-                    </div>
-                    
-                    <div className="flex items-center gap-1.5 bg-indigo-500/10 px-3 py-1.5 rounded-xl">
-                      <Users className="w-4 h-4 text-indigo-400" />
-                      <span className="font-bold text-indigo-400">{leader.count}</span>
-                    </div>
+        <>
+          {/* Target Progress Card */}
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 mb-6 shadow-xl relative overflow-hidden">
+             <div className="absolute top-0 right-0 p-4 opacity-10">
+               <Gift className="w-24 h-24 text-indigo-500" />
+             </div>
+             
+             <div className="relative z-10">
+               <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                 <Gift className="w-5 h-5 text-indigo-400" />
+                 Super Bonus
+               </h3>
+               <p className="text-sm text-slate-400 mt-1">
+                 Invite {TARGET_REFERRALS} friends to unlock a massive <span className="text-amber-400 font-bold">{BONUS_COINS.toLocaleString()} Coin</span> bonus!
+               </p>
+               
+               <div className="mt-5">
+                 <div className="flex justify-between text-xs font-bold text-slate-400 mb-2">
+                   <span>{userReferrals} Referrals</span>
+                   <span>{TARGET_REFERRALS} Target</span>
                  </div>
-               ))
-             )}
-           </div>
-        </div>
+                 <div className="h-3 bg-slate-800 rounded-full overflow-hidden mb-5">
+                   <div 
+                     className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-1000 ease-out"
+                     style={{ width: `${progressPercentage}%` }}
+                   />
+                 </div>
+                 
+                 <button 
+                   onClick={handleClaimBonus}
+                   disabled={userReferrals < TARGET_REFERRALS || hasClaimed || claiming}
+                   className={`w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-transform active:scale-[0.98] ${
+                     hasClaimed 
+                       ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                       : userReferrals >= TARGET_REFERRALS
+                         ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white shadow-lg shadow-orange-500/25'
+                         : 'bg-slate-800 text-slate-400 cursor-not-allowed'
+                   }`}
+                 >
+                   {claiming ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                   {hasClaimed ? 'Bonus Claimed!' : userReferrals >= TARGET_REFERRALS ? 'CLAIM BONUS NOW' : `Need ${TARGET_REFERRALS - userReferrals} More Invites`}
+                 </button>
+               </div>
+             </div>
+          </div>
+
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-xl">
+             <div className="p-6 text-center border-b border-slate-800 bg-slate-900/50">
+               <Trophy className="w-16 h-16 text-yellow-500 mx-auto mb-3" />
+               <h2 className="text-xl font-bold text-white">Top Referrers</h2>
+               <p className="text-sm text-slate-400 mt-1">Invite friends to climb the leaderboard!</p>
+             </div>
+             
+             <div className="divide-y divide-slate-800/50">
+               {leaders.length === 0 ? (
+                 <div className="p-8 text-center text-slate-500">
+                   No referrals yet. Be the first!
+                 </div>
+               ) : (
+                 leaders.map((leader, index) => (
+                   <div key={leader.id} className={`p-4 flex items-center gap-4 ${leader.id === telegramId ? 'bg-indigo-500/10' : ''}`}>
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+                        index === 0 ? 'bg-yellow-500/20 text-yellow-500' :
+                        index === 1 ? 'bg-slate-400/20 text-slate-300' :
+                        index === 2 ? 'bg-amber-700/20 text-amber-600' :
+                        'bg-slate-800 text-slate-500'
+                      }`}>
+                        {index + 1}
+                      </div>
+                      
+                      <div className="flex-1">
+                        <p className="font-bold text-white flex items-center gap-2">
+                          {leader.id === telegramId ? 'You' : `User ${leader.id.toString().slice(0, 4)}...`}
+                        </p>
+                      </div>
+                      
+                      <div className="flex items-center gap-1.5 bg-indigo-500/10 px-3 py-1.5 rounded-xl">
+                        <Users className="w-4 h-4 text-indigo-400" />
+                        <span className="font-bold text-indigo-400">{leader.count}</span>
+                      </div>
+                   </div>
+                 ))
+               )}
+             </div>
+          </div>
+        </>
       )}
     </div>
   );

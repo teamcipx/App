@@ -45,6 +45,7 @@ export default function App() {
           <Route path="/scratch" element={<Scratch />} />
           <Route path="/history" element={<History />} />
         </Routes>
+        <SupportWidget />
       </div>
     </Router>
   );

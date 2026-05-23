@@ -50,12 +50,32 @@ CREATE TABLE IF NOT EXISTS user_tasks (
   UNIQUE(telegram_id, task_id)
 );
 
+CREATE TABLE IF NOT EXISTS support_chats (
+  telegram_id bigint PRIMARY KEY REFERENCES users(telegram_id),
+  status text NOT NULL DEFAULT 'active', -- 'active', 'marked', 'archived'
+  updated_at timestamp with time zone DEFAULT now(),
+  created_at timestamp with time zone DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS support_messages (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  telegram_id bigint NOT NULL REFERENCES support_chats(telegram_id),
+  sender text NOT NULL, -- 'user', 'admin'
+  message text NOT NULL,
+  created_at timestamp with time zone DEFAULT now()
+);
+
+-- Enable realtime for support_messages
+ALTER PUBLICATION supabase_realtime ADD TABLE support_messages;
+
 -- Disable RLS for now so the app works with Anon key, or add policies
 ALTER TABLE settings DISABLE ROW LEVEL SECURITY;
 ALTER TABLE users DISABLE ROW LEVEL SECURITY;
 ALTER TABLE withdrawals DISABLE ROW LEVEL SECURITY;
 ALTER TABLE tasks DISABLE ROW LEVEL SECURITY;
 ALTER TABLE user_tasks DISABLE ROW LEVEL SECURITY;
+ALTER TABLE support_chats DISABLE ROW LEVEL SECURITY;
+ALTER TABLE support_messages DISABLE ROW LEVEL SECURITY;
 
 -- Note: Since we are using an Anon Key for the MVP without authentication, 
 -- we will not enable Row Level Security (RLS) for now. 

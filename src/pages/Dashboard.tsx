@@ -6,7 +6,6 @@ import NoticeDialog from '../components/NoticeDialog';
 import WithdrawDialog from '../components/WithdrawDialog';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import SupportWidget from '../components/SupportWidget';
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);
@@ -433,10 +432,6 @@ export default function Dashboard() {
           </div>
         </div>
       )}
-
-      <div className="mt-8">
-        <SupportWidget />
-      </div>
 
       {user?.telegram_id === Number(import.meta.env.VITE_ADMIN_TELEGRAM_ID || 7360769822) && (
         <div className="mt-8 pt-6 border-t border-slate-900 text-center">
