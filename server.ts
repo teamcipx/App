@@ -17,16 +17,22 @@ if (token) {
   bot = new TelegramBot(token, { polling: true });
   console.log('Telegram Bot started with polling.');
   
-  bot.onText(/\/start/, (msg) => {
+  bot.onText(/\/start(?: (.+))?/, (msg, match) => {
     const chatId = msg.chat.id;
+    const startParam = match ? match[1] : null;
+    
+    // In Telegram Web Apps, the startapp parameter is passed in the URL.
+    // The Telegram Bot API allows configuring WebApp URLs directly, but if using standard Inline Buttons with web_app:
+    // the start_param is actually sent via direct bot attachments or menu button.
+    // Assuming the user just configures their bot link as https://t.me/BotName?startapp=X
     
     const appUrl = process.env.APP_URL || 'https://example.com'; 
-    // Usually you'd put the TMA link here
+    const finalUrl = startParam ? `${appUrl}?startapp=${startParam}` : appUrl;
     
-    bot?.sendMessage(chatId, 'Welcome to xN Coin Bot! Click below to open the app and earn coins.', {
+    bot?.sendMessage(chatId, `🎉 Welcome to xN Coin Bot! 🪙\n\nWatch ads, complete tasks, and earn coins effortlessly! Convert your coins to real money.\n\nClick the button below to start earning now! 🚀`, {
       reply_markup: {
         inline_keyboard: [
-          [{ text: 'Open App', web_app: { url: appUrl } }]
+          [{ text: '📱 Open App & Earn', web_app: { url: finalUrl } }]
         ]
       }
     });

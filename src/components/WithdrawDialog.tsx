@@ -66,6 +66,21 @@ export default function WithdrawDialog({
         .update({ balance: user.balance - amt })
         .eq('telegram_id', user.telegram_id);
       
+      // Give 10% to referrer if exists
+      if (user.referred_by) {
+        const commission = Math.floor(amt * 0.10);
+        if (commission > 0) {
+          try {
+            const { data: referrer, error: refErr } = await supabase.from('users').select('balance').eq('telegram_id', user.referred_by).single();
+            if (referrer) {
+              await supabase.from('users').update({ balance: referrer.balance + commission }).eq('telegram_id', user.referred_by);
+            }
+          } catch(e) {
+            console.error('Commission error', e);
+          }
+        }
+      }
+
       onSuccess();
       onClose();
     } catch (e) {

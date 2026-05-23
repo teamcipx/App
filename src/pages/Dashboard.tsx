@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import WebApp from '@twa-dev/sdk';
-import { Coins, Bell, Wallet, LogOut, Loader2, Play } from 'lucide-react';
+import { Coins, Bell, Wallet, LogOut, Loader2, Play, UserCircle } from 'lucide-react';
 import NoticeDialog from '../components/NoticeDialog';
 import WithdrawDialog from '../components/WithdrawDialog';
+import { useNavigate } from 'react-router-dom';
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);
@@ -13,8 +14,19 @@ export default function Dashboard() {
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [adLoading, setAdLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [cooldown, setCooldown] = useState(0);
+  const navigate = useNavigate();
 
   const telegramId = WebApp?.initDataUnsafe?.user?.id || 7360769822; // Fallback for dev
+  const startParam = WebApp?.initDataUnsafe?.start_param;
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (cooldown > 0) {
+      timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [cooldown]);
 
   useEffect(() => {
     fetchData();
@@ -55,10 +67,48 @@ export default function Dashboard() {
         
         // Create user
         const today = new Date().toISOString().split('T')[0];
-        const newUser = { telegram_id: telegramId, balance: 0, ads_watched_today: 0, last_ad_date: today };
-        const { error: insertError } = await supabase.from('users').insert([newUser]);
+        let initialBalance = 0;
+        let referredBy = null;
+
+        // Has referral?
+        if (startParam && startParam !== telegramId.toString()) {
+          const referrerId = Number(startParam);
+          if (!isNaN(referrerId)) {
+            const { data: referrer, error: refErr } = await supabase.from('users').select('*').eq('telegram_id', referrerId).single();
+            if (referrer) {
+               // Referrer gets 500
+               await supabase.from('users').update({ balance: referrer.balance + 500 }).eq('telegram_id', referrerId);
+               initialBalance = 500; // New user gets 500
+               referredBy = referrerId;
+            }
+          }
+        }
+
+        const newUser: any = { 
+          telegram_id: telegramId, 
+          balance: initialBalance, 
+          ads_watched_today: 0, 
+          last_ad_date: today 
+        };
+        
+        if (referredBy) {
+          newUser.referred_by = referredBy;
+        }
+
+        let { error: insertError } = await supabase.from('users').insert([newUser]);
+        
         if (insertError) {
-           console.error('Error creating user:', insertError);
+           console.error('Error creating user (might be missing referred_by column?):', insertError);
+           // Retry without referred_by
+           if (newUser.referred_by) {
+             delete newUser.referred_by;
+             const retryRes = await supabase.from('users').insert([newUser]);
+             insertError = retryRes.error;
+           }
+        }
+        
+        if (insertError) {
+          console.error('Error creating user:', insertError);
         }
         setUser(newUser);
       }
@@ -93,6 +143,7 @@ export default function Dashboard() {
         }).eq('telegram_id', telegramId);
         
         setUser({ ...user, balance: newBalance, ads_watched_today: newWatched, last_ad_date: today });
+        setCooldown(20); // 20 seconds cooldown
         WebApp.showAlert(`You earned ${settings.coins_per_ad} coins!`);
       } catch (e) {
         console.error("Error updating reward:", e);
@@ -148,7 +199,14 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="p-4 max-w-lg mx-auto">
+    <div className="p-4 max-w-lg mx-auto relative">
+      <button 
+        onClick={() => navigate('/account')}
+        className="absolute top-4 right-4 p-2 bg-slate-900 border border-slate-800 rounded-full text-slate-300 hover:text-white transition-colors"
+      >
+        <UserCircle className="w-6 h-6" />
+      </button>
+
       {settings?.notice_active && (
         <NoticeDialog 
           open={showNotice} 
@@ -208,7 +266,7 @@ export default function Dashboard() {
       )}
 
       <button
-        disabled={adLoading || (user?.ads_watched_today >= settings?.daily_ad_limit)}
+        disabled={adLoading || cooldown > 0 || (user?.ads_watched_today >= settings?.daily_ad_limit)}
         onClick={handleWatchAd}
         className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white disabled:opacity-50 disabled:cursor-not-allowed p-4 rounded-3xl font-bold flex items-center justify-center gap-3 transition-all active:scale-95 shadow-lg shadow-indigo-500/25"
       >
@@ -217,12 +275,18 @@ export default function Dashboard() {
         ) : (
           <Play className="w-6 h-6" fill="currentColor" />
         )}
-        <span>{adLoading ? 'Viewing Ad...' : 'Watch Ad & Earn'}</span>
+        <span>
+          {adLoading 
+            ? 'Viewing Ad...' 
+            : cooldown > 0 
+              ? `Wait ${cooldown}s` 
+              : 'Watch Ad & Earn'}
+        </span>
       </button>
 
       {user?.telegram_id === Number(import.meta.env.VITE_ADMIN_TELEGRAM_ID || 7360769822) && (
         <div className="mt-8 pt-6 border-t border-slate-900 text-center">
-          <a href="/admin" className="text-slate-500 text-sm hover:text-slate-300">Admin Dashboard &rarr;</a>
+          <button onClick={() => navigate('/admin')} className="text-slate-500 text-sm hover:text-slate-300">Admin Dashboard &rarr;</button>
         </div>
       )}
     </div>
