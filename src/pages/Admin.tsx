@@ -10,6 +10,8 @@ export default function Admin() {
   const [withdrawals, setWithdrawals] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [broadcastMsg, setBroadcastMsg] = useState('');
+  const [broadcastBtnText, setBroadcastBtnText] = useState('');
+  const [broadcastBtnUrl, setBroadcastBtnUrl] = useState('');
   const [sendingBroadcast, setSendingBroadcast] = useState(false);
   const [activeTab, setActiveTab] = useState<'settings' | 'users' | 'broadcast' | 'withdraw'>('settings');
 
@@ -99,7 +101,9 @@ export default function Admin() {
         body: JSON.stringify({
           message: broadcastMsg,
           users: ids,
-          adminId: telegramId
+          adminId: telegramId,
+          buttonText: broadcastBtnText,
+          buttonUrl: broadcastBtnUrl
         }),
       });
       
@@ -107,6 +111,8 @@ export default function Admin() {
       if (response.ok && result.success) {
         WebApp.showAlert(`Message sent to ${result.successCount} users. Failed: ${result.failCount}`);
         setBroadcastMsg('');
+        setBroadcastBtnText('');
+        setBroadcastBtnUrl('');
       } else {
         WebApp.showAlert(`Failed: ${result.error || 'Server error'} (Status: ${response.status})`);
       }
@@ -302,6 +308,29 @@ export default function Admin() {
             placeholder="Type your promotional message here..."
             className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-white resize-none focus:outline-none focus:border-indigo-500 min-h-[150px] mb-4"
           />
+
+          <div className="flex gap-4 mb-4">
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-slate-400 mb-1">Button Text (Optional)</label>
+              <input 
+                type="text"
+                value={broadcastBtnText}
+                onChange={e => setBroadcastBtnText(e.target.value)}
+                placeholder="e.g. Open App"
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-slate-400 mb-1">Button Link (Optional)</label>
+              <input 
+                type="text"
+                value={broadcastBtnUrl}
+                onChange={e => setBroadcastBtnUrl(e.target.value)}
+                placeholder="e.g. https://..."
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+          </div>
           
           <button 
             onClick={handleSendBroadcast}

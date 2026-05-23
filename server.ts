@@ -31,10 +31,10 @@ if (token) {
     const appUrl = process.env.VITE_APP_URL || 'https://nxpost.online'; 
     const finalUrl = startParam ? `${appUrl}?startapp=${startParam}` : appUrl;
     
-    let welcomeMessage = `🎉 Welcome to xN Coin Bot! 🪙\n\nWatch ads, complete tasks, and earn coins effortlessly! Convert your coins to real money.\n\nClick the button below to start earning now! 🚀`;
+    let welcomeMessage = `🎉 xN Coin Bot-এ আপনাকে স্বাগতম! 🪙\n\nবিজ্ঞাপন দেখুন, টাস্ক পূরণ করুন এবং খুব সহজেই কয়েন আয় করুন! আপনার কয়েনগুলোকে আসল টাকায় রূপান্তর করুন।\n\nনিচের বাটনে ক্লিক করে এখনই আয় করা শুরু করুন! 🚀`;
 
     if (startParam) {
-      welcomeMessage = `🎉 Welcome to xN Coin Bot! 🪙\n\nYou were referred by a friend! Click below to open the app, claim your 500 Coin bonus, and start earning real money! 🚀`;
+      welcomeMessage = `🎉 xN Coin Bot-এ আপনাকে স্বাগতম! 🪙\n\nআপনি একজন বন্ধুর রেফারেন্স দিয়ে যুক্ত হয়েছেন! অ্যাপটি খুলতে, আপনার ৫০০ কয়েন বোনাস সংগ্রহ করতে এবং আসল টাকা আয় শুরু করতে নিচের বাটনে ক্লিক করুন! 🚀`;
     }
 
     if (supabase) {
@@ -56,10 +56,11 @@ if (token) {
                 referredBy = referrerId;
                 
                 // Send Telegram message to referrer
-                bot?.sendMessage(referrerId, `🎉 *New Referral!*\n\nSomeone just joined using your link. You have earned 500 Coins! 💰`, { parse_mode: 'Markdown' }).catch(console.error);
+                bot?.sendMessage(referrerId, `🎉 *নতুন রেফারেল!*\n\nকেউ মাত্র আপনার লিংক ব্যবহার করে যুক্ত হয়েছে। আপনি ৫০০ কয়েন পেয়েছেন! 💰`, { parse_mode: 'Markdown' }).catch(console.error);
               }
             }
           }
+
 
           const newUser: any = {
             telegram_id: chatId,
@@ -106,7 +107,7 @@ async function startServer() {
 
   // API route for broadcasting messages
   app.post('/api/broadcast', async (req, res) => {
-    const { message, users, adminId } = req.body;
+    const { message, users, adminId, buttonText, buttonUrl } = req.body;
     
     const envAdminId = process.env.ADMIN_TELEGRAM_ID || process.env.VITE_ADMIN_TELEGRAM_ID;
 
@@ -121,9 +122,18 @@ async function startServer() {
     let successCount = 0;
     let failCount = 0;
 
+    const options: TelegramBot.SendMessageOptions = {};
+    if (buttonText && buttonUrl) {
+      options.reply_markup = {
+        inline_keyboard: [
+          [{ text: buttonText, url: buttonUrl }]
+        ]
+      };
+    }
+
     for (const telegramId of users) {
       try {
-        await bot.sendMessage(telegramId, message);
+        await bot.sendMessage(telegramId, message, Object.keys(options).length > 0 ? options : undefined);
         successCount++;
       } catch (err) {
         console.error(`Failed to send message to ${telegramId}:`, err);
