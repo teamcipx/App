@@ -467,11 +467,11 @@ export default function Dashboard() {
         </button>
 
         <button 
-          onClick={() => {}}
-          className="w-full bg-amber-500/5 text-amber-500/50 border border-amber-500/20 p-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all cursor-not-allowed"
+          className="w-full relative overflow-hidden bg-gradient-to-r from-red-500/20 to-orange-500/20 border border-red-500/30 p-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all"
         >
-           <Play className="w-5 h-5 opacity-50" />
-           <span>How to work video (Coming Soon)</span>
+           <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 to-orange-500/10 animate-pulse"></div>
+           <Play className="w-6 h-6 text-red-500 relative z-10" />
+           <span className="text-red-400 relative z-10 text-lg">How to work video <span className="text-xs bg-red-500/20 px-2 py-1 rounded ml-1 text-red-300">Coming Soon</span></span>
         </button>
       </div>
 

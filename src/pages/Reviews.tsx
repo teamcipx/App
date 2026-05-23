@@ -214,16 +214,18 @@ export default function Reviews() {
             </div>
             
             <form onSubmit={handleSubmit} className="p-4 flex flex-col overflow-y-auto">
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-slate-400 mb-1">Your Name</label>
-                <input 
-                  type="text" 
-                  value={newName} 
-                  onChange={(e) => setNewName(e.target.value)} 
-                  placeholder={isAdmin ? "Name (Admin can fake)" : (WebApp?.initDataUnsafe?.user?.first_name || 'Anonymous')}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-indigo-500"
-                />
-              </div>
+              {isAdmin && (
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-slate-400 mb-1">Reviewer Name (Admin Only)</label>
+                  <input 
+                    type="text" 
+                    value={newName} 
+                    onChange={(e) => setNewName(e.target.value)} 
+                    placeholder="Name (Admin can fake)"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
+              )}
               
               <div className="mb-4">
                 <label className="block text-sm font-medium text-slate-400 mb-1">Your Experience</label>

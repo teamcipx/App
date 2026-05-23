@@ -122,7 +122,7 @@ async function startServer() {
     let successCount = 0;
     let failCount = 0;
 
-    const options: any = { parse_mode: 'HTML' };
+    const options: any = {};
     if (buttonText && buttonUrl) {
       let finalUrl = buttonUrl.trim();
       if (!/^https?:\/\//i.test(finalUrl) && !/^tg:\/\//i.test(finalUrl)) {
