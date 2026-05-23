@@ -31,6 +31,19 @@ export default function Tasks() {
     return () => clearTimeout(timer);
   }, [activeTaskTimer]);
 
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && activeTaskTimer && activeTaskTimer.timeLeft > 1) {
+        // Returned to the app before timer finished (allow 1s buffer)
+        WebApp.showAlert(`You returned too early! You must stay on the webpage for the full time.`);
+        setActiveTaskTimer(null);
+      }
+    };
+    
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [activeTaskTimer]);
+
   const fetchTasks = async () => {
     setLoading(true);
     try {

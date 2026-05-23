@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import WebApp from '@twa-dev/sdk';
-import { Coins, Bell, Wallet, LogOut, Loader2, Play, UserCircle } from 'lucide-react';
+import { Coins, Bell, Wallet, LogOut, Loader2, Play, UserCircle, History as HistoryIcon } from 'lucide-react';
 import NoticeDialog from '../components/NoticeDialog';
 import WithdrawDialog from '../components/WithdrawDialog';
 import { useNavigate } from 'react-router-dom';
@@ -13,6 +13,7 @@ export default function Dashboard() {
   const [showNotice, setShowNotice] = useState(false);
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [adLoading, setAdLoading] = useState(false);
+  const [adReady, setAdReady] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [cooldown, setCooldown] = useState(0);
   const navigate = useNavigate();
@@ -29,6 +30,23 @@ export default function Dashboard() {
     }
     return () => clearTimeout(timer);
   }, [cooldown]);
+
+  useEffect(() => {
+    const checkAd = setInterval(() => {
+      if (typeof window !== 'undefined' && typeof (window as any).show_11042874 === 'function') {
+        setAdReady(true);
+        clearInterval(checkAd);
+      }
+    }, 1000);
+    
+    // Fallback: if ad blocker blocks the script, we still let them proceed after 5 seconds to not break the app
+    const fallback = setTimeout(() => setAdReady(true), 5000);
+
+    return () => {
+      clearInterval(checkAd);
+      clearTimeout(fallback);
+    }
+  }, []);
 
   useEffect(() => {
     fetchData();
@@ -225,12 +243,20 @@ export default function Dashboard() {
 
   return (
     <div className="p-4 max-w-lg mx-auto relative">
-      <button 
-        onClick={() => navigate('/account')}
-        className="absolute top-4 right-4 p-2 bg-slate-900 border border-slate-800 rounded-full text-slate-300 hover:text-white transition-colors"
-      >
-        <UserCircle className="w-6 h-6" />
-      </button>
+      <div className="absolute top-4 right-4 flex items-center gap-2">
+        <button 
+          onClick={() => navigate('/history')}
+          className="p-2 bg-slate-900 border border-slate-800 rounded-full text-slate-300 hover:text-white transition-colors"
+        >
+          <HistoryIcon className="w-6 h-6" /> 
+        </button>
+        <button 
+          onClick={() => navigate('/account')}
+          className="p-2 bg-slate-900 border border-slate-800 rounded-full text-slate-300 hover:text-white transition-colors"
+        >
+          <UserCircle className="w-6 h-6" />
+        </button>
+      </div>
 
       {settings?.notice_active && (
         <NoticeDialog 
@@ -302,21 +328,23 @@ export default function Dashboard() {
       {!user?.is_banned && (
         <div className="space-y-4">
           <button
-            disabled={adLoading || cooldown > 0 || (user?.ads_watched_today >= settings?.daily_ad_limit)}
+            disabled={!adReady || adLoading || cooldown > 0 || (user?.ads_watched_today >= settings?.daily_ad_limit)}
             onClick={handleWatchAd}
             className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white disabled:opacity-50 disabled:cursor-not-allowed p-4 rounded-3xl font-bold flex items-center justify-center gap-3 transition-all active:scale-[0.98] shadow-lg shadow-indigo-500/25"
           >
-            {adLoading ? (
+            {(!adReady || adLoading) ? (
               <Loader2 className="w-6 h-6 animate-spin" />
             ) : (
               <Play className="w-6 h-6" fill="currentColor" />
             )}
             <span>
-              {adLoading 
-                ? 'Viewing Ad...' 
-                : cooldown > 0 
-                  ? `Wait ${cooldown}s` 
-                  : 'Watch Ad & Earn'}
+              {!adReady 
+                ? 'Loading Ad...' 
+                : adLoading 
+                  ? 'Viewing Ad...' 
+                  : cooldown > 0 
+                    ? `Wait ${cooldown}s` 
+                    : 'Watch Ad & Earn'}
             </span>
           </button>
 
