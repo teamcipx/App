@@ -26,7 +26,7 @@ export default function App() {
 
   return (
     <Router>
-      <div className="min-h-screen bg-slate-950 text-slate-50 font-sans font-medium selection:bg-indigo-500/30 pb-20">
+      <div className="min-h-screen bg-slate-950 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/20 via-slate-950 to-slate-950 text-slate-50 font-sans font-medium selection:bg-indigo-500/30 pb-20">
         <Toaster position="top-center" theme="dark" toastOptions={{
           style: {
             background: '#1e293b',

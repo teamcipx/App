@@ -166,10 +166,10 @@ export default function Reviews() {
       </div>
 
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white mb-2">Payment Proofs & Reviews</h1>
-        <div className="flex items-center justify-between">
-          <p className="text-slate-400 text-sm">See what other users are saying about xN Coin!</p>
-          {!loading && <span className="bg-slate-800 text-slate-300 text-xs px-2 py-1 rounded-md font-medium">Total Reviews: {reviews.length}</span>}
+        <h1 className="text-2xl font-extrabold text-white mb-2 ml-1">পেমেন্ট প্রুফ ও রিভিউ</h1>
+        <div className="flex items-center justify-between ml-1">
+          <p className="text-indigo-200/60 text-sm">আমাদের ইউজারদের রিভিউগুলো দেখুন!</p>
+          {!loading && <span className="bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs px-2.5 py-1 rounded-lg font-medium">মোট রিভিউ: {reviews.length}</span>}
         </div>
       </div>
 
@@ -178,21 +178,21 @@ export default function Reviews() {
       ) : (
         <div className="space-y-4">
           {reviews.length === 0 ? (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-slate-500">
-              No reviews yet. Be the first to share your experience!
+            <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-700/50 rounded-3xl p-8 text-center text-slate-400">
+              এখনও কোন রিভিউ নেই। আপনিই প্রথম রিভিউ দিন!
             </div>
           ) : (
             reviews.map(review => (
-              <div key={review.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm">
+              <div key={review.id} className="bg-slate-900/50 backdrop-blur-sm border border-slate-700/50 rounded-3xl p-5 shadow-lg shadow-black/20">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center font-bold text-slate-400">
+                  <div className="w-10 h-10 bg-indigo-500/20 rounded-full flex items-center justify-center font-bold text-indigo-400 border border-indigo-500/30">
                     {review.name.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <p className="font-bold text-white flex items-center gap-1.5">
+                    <p className="font-bold text-slate-100 flex items-center gap-1.5">
                       {review.name}
                       {review.name.toLowerCase() === 'admin' && (
-                        <BadgeCheck className="w-4 h-4 text-blue-400" />
+                        <BadgeCheck className="w-4 h-4 text-emerald-400" />
                       )}
                     </p>
                     <p className="text-xs text-slate-500">{new Date(review.created_at).toLocaleDateString()}</p>

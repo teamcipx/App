@@ -41,7 +41,7 @@ export default function Tasks() {
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (!document.hidden && activeTaskTimer && activeTaskTimer.timeLeft > 1) {
-        toast.error(`You returned too early! You must stay on the webpage for the full time.`);
+        toast.error(`আপনি খুব দ্রুত ফিরে এসেছেন! পুরো সময় ওয়েবসাইটে থাকতে হবে।`);
         setFailedTasks(prev => Array.from(new Set([...prev, activeTaskTimer.id])));
         setActiveTaskTimer(null);
       }
@@ -140,7 +140,7 @@ export default function Tasks() {
     if (!file || !selectedTaskId) return;
 
     if (imgbbKeys.length === 0) {
-      toast.error('Image upload is not configured. Please contact admin.');
+      toast.error('ইমেজ আপলোড কনফিগার করা নেই। অ্যাডমিনকে জানান।');
       return;
     }
 
@@ -172,7 +172,7 @@ export default function Tasks() {
     }
 
     if (!success) {
-      toast.error('Failed to upload image. Please try again later.');
+      toast.error('ইমেজ আপলোড ব্যর্থ হয়েছে। আবার চেষ্টা করুন।');
       setUploadingTask(null);
       return;
     }
@@ -192,11 +192,11 @@ export default function Tasks() {
         task_id: task.id
       }]);
 
-      toast.success('Screenshot uploaded! Your reward is pending review.');
+      toast.success('স্ক্রিনশট আপলোড হয়েছে! আপনার রিওয়ার্ড রিভিউর জন্য পেন্ডিং আছে।');
       fetchTasks();
     } catch (err) {
       console.error(err);
-      toast.error('Failed to submit proof.');
+      toast.error('প্রমাণ জমা দিতে ব্যর্থ হয়েছে।');
     } finally {
       setUploadingTask(null);
       setSelectedTaskId(null);
@@ -225,11 +225,11 @@ export default function Tasks() {
       const newBalance = userBalance + task.reward;
       await supabase.from('users').update({ balance: newBalance }).eq('telegram_id', telegramId);
       
-      toast.success(`Task Completed! You earned ${task.reward} Coins.`);
+      toast.success(`টাস্ক সম্পন্ন হয়েছে! আপনি ${task.reward} পয়েন্ট পেয়েছেন।`);
       fetchTasks();
     } catch (err) {
       console.error(err);
-      toast.error('Failed to complete task.');
+      toast.error('টাস্ক সম্পন্ন করতে ব্যর্থ হয়েছে।');
     }
   };
 
@@ -238,12 +238,12 @@ export default function Tasks() {
   }
 
   return (
-    <div className="p-4 max-w-md mx-auto pb-8 animate-in fade-in zoom-in-95 duration-300">
+    <div className="p-4 max-w-lg mx-auto pb-8 animate-in fade-in zoom-in-95 duration-300">
       <div className="flex items-center gap-3 mb-6 pt-4">
-        <button onClick={() => navigate('/')} className="p-2 bg-slate-900 border border-slate-800 rounded-xl hover:bg-slate-800 transition-colors">
+        <button onClick={() => navigate('/')} className="p-2.5 bg-slate-900 border border-slate-700/50 rounded-2xl hover:bg-slate-800 transition-colors">
           <ArrowLeft className="w-5 h-5 text-white" />
         </button>
-        <h1 className="text-2xl font-bold text-white">Daily Tasks</h1>
+        <h1 className="text-2xl font-extrabold text-white">ডেইলি টাস্ক</h1>
       </div>
 
       <input 
@@ -261,42 +261,42 @@ export default function Tasks() {
           const isFailed = failedTasks.includes(task.id);
 
           return (
-            <div key={task.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg relative overflow-hidden">
+            <div key={task.id} className="bg-slate-900/50 backdrop-blur-sm border border-slate-700/50 rounded-3xl p-5 shadow-lg relative overflow-hidden">
                {isActive && (
                  <div className="absolute inset-0 bg-indigo-500/10 z-0 animate-pulse"></div>
                )}
                <div className="relative z-10 flex items-start gap-4">
-                  <div className={`p-3 rounded-full ${status === 'available' ? 'bg-indigo-500/20 text-indigo-400' : 'bg-slate-800 text-slate-500'}`}>
+                  <div className={`p-3 rounded-2xl border ${status === 'available' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' : 'bg-slate-800 text-slate-500 border-slate-700'}`}>
                     {status === 'available' ? <ListTodo className="w-6 h-6" /> : <Clock className="w-6 h-6" />}
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-white font-bold mb-1">{task.title}</h3>
+                    <h3 className="text-slate-100 font-bold mb-1 leading-tight">{task.title.replace('[PLAYSTORE]', '').trim()}</h3>
                     <div className="flex items-center gap-3 text-sm">
-                      <span className="text-indigo-400 font-bold">+{task.reward} Coins</span>
-                      <span className="text-slate-500 flex items-center gap-1"><Clock className="w-3 h-3" /> {task.wait_time}s limit</span>
+                      <span className="text-indigo-400 font-bold bg-indigo-500/10 px-2 py-0.5 rounded-lg border border-indigo-500/20">+{task.reward} xNC</span>
+                      <span className="text-slate-500 flex items-center gap-1"><Clock className="w-3 h-3" /> {task.wait_time}s</span>
                     </div>
                   </div>
                </div>
                
-               <div className="relative z-10 mt-4 pt-4 border-t border-slate-800 flex items-center justify-between">
+               <div className="relative z-10 mt-4 pt-4 border-t border-slate-800/50 flex items-center justify-between">
                   {status === 'available' ? (
                     isActive ? (
-                      <button disabled className="w-full bg-slate-800 text-indigo-400 py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2">
-                        <Loader2 className="w-4 h-4 animate-spin" /> Verifying... {activeTaskTimer.timeLeft}s
+                      <button disabled className="w-full bg-slate-800 text-indigo-400 py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 border border-indigo-500/30">
+                        <Loader2 className="w-5 h-5 animate-spin" /> চেকিং... {activeTaskTimer.timeLeft}s
                       </button>
                     ) : uploadingTask === task.id ? (
-                      <button disabled className="w-full bg-slate-800 text-indigo-400 py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2">
-                        <Loader2 className="w-4 h-4 animate-spin" /> Uploading proof...
+                      <button disabled className="w-full bg-slate-800 text-indigo-400 py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 border border-indigo-500/30">
+                        <Loader2 className="w-5 h-5 animate-spin" /> আপলোড হচ্ছে...
                       </button>
                     ) : (
-                      <button onClick={() => handleStartTask(task)} className={`w-full ${isFailed ? 'bg-amber-600 hover:bg-amber-500' : 'bg-indigo-600 hover:bg-indigo-500'} text-white py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-transform active:scale-[0.98]`}>
-                        {task.title.includes('[PLAYSTORE]') ? 'Upload Screenshot' : isFailed ? 'Resume Task' : 'Start Task'} 
-                        {task.title.includes('[PLAYSTORE]') ? <Upload className="w-4 h-4" /> : <ExternalLink className="w-4 h-4" />}
+                      <button onClick={() => handleStartTask(task)} className={`w-full ${isFailed ? 'bg-amber-500/20 border border-amber-500/30 text-amber-400 hover:bg-amber-500/30' : 'bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-400 hover:to-indigo-500 text-white'} py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-transform active:scale-[0.98] shadow-md`}>
+                        {task.title.includes('[PLAYSTORE]') ? 'স্ক্রিনশট আপলোড করুন' : isFailed ? 'আবার শুরু করুন' : 'টাস্ক শুরু করুন'} 
+                        {task.title.includes('[PLAYSTORE]') ? <Upload className="w-5 h-5" /> : <ExternalLink className="w-5 h-5" />}
                       </button>
                     )
                   ) : (
-                    <button disabled className="w-full bg-slate-950 text-slate-500 py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-green-500" /> Done (Come back in {formatTimeRemaining(timeRemaining)})
+                    <button disabled className="w-full bg-slate-950/50 text-slate-500 py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 border border-slate-800/50">
+                      <CheckCircle className="w-5 h-5 text-emerald-500" /> সম্পন্ন (ফিরে আসুন {formatTimeRemaining(timeRemaining)})
                     </button>
                   )}
                </div>
@@ -305,9 +305,9 @@ export default function Tasks() {
         })}
 
         {tasks.length === 0 && (
-          <div className="text-center py-10 bg-slate-900 border border-slate-800 rounded-2xl">
-            <ListTodo className="w-12 h-12 text-slate-700 mx-auto mb-3" />
-            <p className="text-slate-400 font-medium">No tasks available yet.</p>
+          <div className="text-center py-12 bg-slate-900/50 backdrop-blur-sm border border-slate-700/50 rounded-3xl">
+            <ListTodo className="w-12 h-12 text-slate-600 mx-auto mb-3" />
+            <p className="text-slate-400 font-medium">এখনও কোনো টাস্ক নেই।</p>
           </div>
         )}
       </div>

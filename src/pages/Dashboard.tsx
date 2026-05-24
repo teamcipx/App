@@ -343,26 +343,26 @@ export default function Dashboard() {
 
       {!user?.is_banned && (
         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 mb-6 shadow-xl">
-          <div className="flex justify-between items-center mb-6 border-b border-slate-800 pb-6">
+          <div className="flex justify-between items-center mb-6 border-b border-indigo-500/20 pb-6">
             <div>
-              <p className="text-slate-400 text-sm font-medium mb-1">Your Balance</p>
+              <p className="text-indigo-200/70 text-sm font-medium mb-1">আপনার ব্যালেন্স</p>
               <div className="flex items-baseline gap-2">
-                <span className="text-4xl font-bold tracking-tight text-white">{user?.balance || 0}</span>
-                <span className="text-indigo-400 font-medium">xNC</span>
+                <span className="text-4xl font-extrabold tracking-tight text-white drop-shadow-sm">{user?.balance || 0}</span>
+                <span className="text-indigo-400 font-bold">xNC</span>
               </div>
             </div>
             <button 
               onClick={() => setShowWithdraw(true)}
-              className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white px-4 py-2.5 rounded-2xl transition-colors active:scale-95"
+              className="flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white px-5 py-3 rounded-2xl transition-all active:scale-95 shadow-lg shadow-emerald-500/25"
             >
-              <Wallet className="w-4 h-4" />
-              <span>Withdraw</span>
+              <Wallet className="w-5 h-5" />
+              <span className="font-bold">উত্তোলন</span>
             </button>
           </div>
 
-          <div className="flex justify-between items-center text-sm">
-            <span className="text-slate-400">Daily Ads Watched:</span>
-            <span className="font-mono bg-slate-950 px-2 py-0.5 rounded text-indigo-400">
+          <div className="flex justify-between items-center text-sm font-medium">
+            <span className="text-slate-300">আজকের দেখা অ্যাড:</span>
+            <span className="font-mono bg-indigo-500/20 px-3 py-1 rounded-lg text-indigo-300 border border-indigo-500/30">
               {user?.ads_watched_today || 0} / {settings?.daily_ad_limit || 0}
             </span>
           </div>
@@ -380,55 +380,55 @@ export default function Dashboard() {
           <button
             disabled={!adReady || adLoading || cooldown > 0 || (user?.ads_watched_today >= settings?.daily_ad_limit)}
             onClick={handleWatchAd}
-            className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white disabled:opacity-50 disabled:cursor-not-allowed p-4 rounded-3xl font-bold flex items-center justify-center gap-3 transition-all active:scale-[0.98] shadow-lg shadow-indigo-500/25"
+            className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white disabled:opacity-50 disabled:cursor-not-allowed p-4 rounded-3xl font-bold flex items-center justify-center gap-3 transition-all active:scale-[0.98] shadow-lg shadow-indigo-500/25 border border-indigo-400/20"
           >
             {(!adReady || adLoading) ? (
               <Loader2 className="w-6 h-6 animate-spin" />
             ) : (
               <Play className="w-6 h-6" fill="currentColor" />
             )}
-            <span>
+            <span className="text-lg">
               {!adReady 
-                ? 'Loading Ad...' 
+                ? 'অ্যাড লোড হচ্ছে...' 
                 : adLoading 
-                  ? 'Viewing Ad...' 
+                  ? 'অ্যাড দেখা হচ্ছে...' 
                   : cooldown > 0 
-                    ? `Wait ${cooldown}s` 
-                    : 'Watch Ad & Earn'}
+                    ? `অপেক্ষা করুন ${cooldown}s` 
+                    : 'অ্যাড দেখুন ও আয় করুন'}
             </span>
           </button>
 
           <button
             onClick={() => navigate('/tasks')}
-            className="w-full bg-slate-900 border border-slate-800 hover:bg-slate-800 text-white p-4 rounded-3xl font-bold flex items-center justify-between transition-all active:scale-[0.98]"
+            className="w-full bg-slate-900/50 backdrop-blur-sm border border-slate-700/50 hover:bg-slate-800 text-white p-4 rounded-3xl font-bold flex items-center justify-between transition-all active:scale-[0.98]"
           >
             <div className="flex items-center gap-3">
-               <div className="p-2 bg-indigo-500/10 text-indigo-400 rounded-xl">
-                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+               <div className="p-2.5 bg-indigo-500/10 text-indigo-400 rounded-xl">
+                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                </div>
-               <span className="text-lg">Daily Tasks</span>
+               <span className="text-lg">ডেইলি টাস্ক</span>
             </div>
-            <span className="bg-indigo-500/20 text-indigo-400 text-xs px-2 py-1 rounded-lg">Earn Extra</span>
+            <span className="bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs px-3 py-1.5 rounded-lg">আরও আয় করুন</span>
           </button>
           
           <div className="grid grid-cols-2 gap-4">
             <button
               onClick={() => navigate('/spin')}
-              className="bg-slate-900 border border-slate-800 hover:bg-slate-800 text-white p-4 rounded-3xl font-bold flex flex-col items-center justify-center gap-3 transition-all active:scale-[0.98]"
+              className="bg-slate-900/50 backdrop-blur-sm border border-slate-700/50 hover:bg-slate-800 text-white p-5 rounded-3xl font-bold flex flex-col items-center justify-center gap-3 transition-all active:scale-[0.98]"
             >
-              <div className="p-3 bg-purple-500/10 text-purple-400 rounded-full">
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+              <div className="p-4 bg-purple-500/10 text-purple-400 rounded-2xl shadow-inner">
+                <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
               </div>
-              <span className="text-sm">Spin Wheel</span>
+              <span className="text-sm">স্পিন হুইল</span>
             </button>
             <button
               onClick={() => navigate('/scratch')}
-              className="bg-slate-900 border border-slate-800 hover:bg-slate-800 text-white p-4 rounded-3xl font-bold flex flex-col items-center justify-center gap-3 transition-all active:scale-[0.98]"
+              className="bg-slate-900/50 backdrop-blur-sm border border-slate-700/50 hover:bg-slate-800 text-white p-5 rounded-3xl font-bold flex flex-col items-center justify-center gap-3 transition-all active:scale-[0.98]"
             >
-              <div className="p-3 bg-amber-500/10 text-amber-500 rounded-full">
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
+              <div className="p-4 bg-amber-500/10 text-amber-500 rounded-2xl shadow-inner">
+                <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
               </div>
-              <span className="text-sm">Scratch Card</span>
+              <span className="text-sm">স্ক্র্যাচ কার্ড</span>
             </button>
           </div>
         </div>
@@ -438,10 +438,10 @@ export default function Dashboard() {
       <div className="mt-6 space-y-3">
         <button 
           onClick={() => navigate('/reviews')}
-          className="w-full bg-slate-900 border border-slate-800 hover:bg-slate-800 text-white p-4 rounded-2xl font-medium flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+          className="w-full bg-slate-900/50 backdrop-blur-sm border border-slate-700/50 hover:bg-slate-800 text-white p-4 rounded-2xl font-medium flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
         >
           <MessageSquare className="w-5 h-5 text-indigo-400" />
-          <span>Payment Proofs & Reviews</span>
+          <span>পেমেন্ট প্রুফ ও রিভিউ</span>
         </button>
 
         <a 
@@ -453,17 +453,17 @@ export default function Dashboard() {
           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
             <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a5.96 5.96 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.892-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
           </svg>
-          <span>Join Telegram Channel</span>
+          <span>টেলিগ্রাম চ্যানেলে জয়েন করুন</span>
         </a>
         
         <button 
           onClick={() => {}}
-          className="w-full bg-slate-900 border border-slate-800 text-slate-500 p-4 rounded-2xl font-medium flex items-center justify-center gap-2 transition-all cursor-not-allowed"
+          className="w-full bg-slate-900/40 border border-slate-800/50 text-slate-500 p-4 rounded-2xl font-medium flex items-center justify-center gap-2 transition-all cursor-not-allowed"
         >
           <svg className="w-5 h-5 opacity-50" viewBox="0 0 24 24" fill="currentColor">
             <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
           </svg>
-          <span>FB Page (Coming Soon)</span>
+          <span>ফেসবুক পেজ (খুব শীঘ্রই)</span>
         </button>
 
         <button 
@@ -471,7 +471,7 @@ export default function Dashboard() {
         >
            <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 to-orange-500/10 animate-pulse"></div>
            <Play className="w-6 h-6 text-red-500 relative z-10" />
-           <span className="text-red-400 relative z-10 text-lg">How to work video <span className="text-xs bg-red-500/20 px-2 py-1 rounded ml-1 text-red-300">Coming Soon</span></span>
+           <span className="text-red-400 relative z-10 text-lg">কিভাবে কাজ করবেন <span className="text-xs bg-red-500/20 px-2 py-1 rounded ml-1 text-red-300">শীঘ্রই</span></span>
         </button>
       </div>
 

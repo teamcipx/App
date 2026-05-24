@@ -42,7 +42,7 @@ export default function Spin() {
     if (!user || spinning) return;
     
     if (user.customState.spinsToday >= 4) {
-      toast.error('You reached your daily limit of 4 spins.');
+      toast.error('আপনি আজকের মতো সব স্পিন লিমিট শেষ করেছেন।');
       return;
     }
 
@@ -53,7 +53,7 @@ export default function Spin() {
     if (timeSinceLastSpin < TWO_HOURS && user.customState.spinsToday > 0) {
       const msLeft = TWO_HOURS - timeSinceLastSpin;
       const minsLeft = Math.ceil(msLeft / (1000 * 60));
-      toast.error(`Please wait ${minsLeft} minutes before spinning again.`);
+      toast.error(`দয়া করে আবার স্পিন করতে ${minsLeft} মিনিট অপেক্ষা করুন।`);
       return;
     }
 
@@ -85,7 +85,7 @@ export default function Spin() {
        }).eq('telegram_id', telegramId);
 
        setUser({ ...user, balance: newBalance, customState: newState });
-       toast.success(`You won ${reward} coins!`);
+       toast.success(`আপনি ${reward} পয়েন্ট জিতেছেন!`);
        setSpinning(false);
     }, 4000);
   };
@@ -96,21 +96,21 @@ export default function Spin() {
   const nextSpinReady = (Date.now() - (user?.customState?.lastSpinTime || 0)) >= 2 * 60 * 60 * 1000 || user?.customState?.spinsToday === 0;
 
   return (
-    <div className="p-4 max-w-lg mx-auto relative min-h-screen flex flex-col">
+    <div className="p-4 max-w-lg mx-auto relative min-h-screen flex flex-col pt-8">
       <div className="flex items-center justify-between mb-8 pt-2">
-        <button onClick={() => navigate('/')} className="p-2 bg-slate-900 border border-slate-800 rounded-full text-slate-300 hover:text-white transition-colors">
+        <button onClick={() => navigate('/')} className="p-2.5 bg-slate-900 border border-slate-700/50 rounded-2xl hover:bg-slate-800 transition-colors text-white">
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <div className="bg-slate-900 border border-slate-800 px-4 py-2 rounded-xl text-indigo-400 font-bold">
+        <div className="bg-indigo-500/10 border border-indigo-500/20 px-4 py-2 rounded-xl text-indigo-400 font-bold shadow-inner">
           {user?.balance || 0} xNC
         </div>
       </div>
 
       <div className="text-center mb-10">
-        <h1 className="text-3xl font-bold text-white mb-2">Daily Spin</h1>
-        <p className="text-slate-400 text-sm">Spin to win up to 200 coins.</p>
+        <h1 className="text-3xl font-extrabold text-white mb-2">ডেইলি স্পিন</h1>
+        <p className="text-indigo-200/60 text-sm">স্পিন করে জিতুন ২০০ কয়েন পর্যন্ত।</p>
         <div className="mt-4 flex justify-center gap-4 text-sm font-medium">
-           <span className="bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg text-slate-300">Spins Left: <span className="text-white">{spinsLeft}</span></span>
+           <span className="bg-indigo-500/10 border border-indigo-500/20 px-3 py-1.5 rounded-lg text-indigo-300">স্পিন বাকি: <span className="text-white font-bold">{spinsLeft}</span></span>
         </div>
       </div>
 
@@ -148,9 +148,9 @@ export default function Spin() {
         <button 
           disabled={spinning || spinsLeft === 0 || (!nextSpinReady && spinsLeft > 0)}
           onClick={handleSpin}
-          className="mt-12 bg-indigo-600 w-full sm:w-auto px-16 hover:bg-indigo-500 text-white p-4 rounded-3xl font-bold flex items-center justify-center gap-3 transition-transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-indigo-500/25"
+          className="mt-12 bg-gradient-to-r from-indigo-500 to-indigo-600 w-full sm:w-auto px-16 hover:from-indigo-400 hover:to-indigo-500 text-white py-4 rounded-3xl font-extrabold flex items-center justify-center gap-3 transition-transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-indigo-500/20 text-lg border border-indigo-400/20"
         >
-          {spinning ? 'Spinning...' : spinsLeft === 0 ? 'No Spins Left' : !nextSpinReady ? 'Wait 2 Hours' : 'SPIN NOW'}
+          {spinning ? 'ঘুরছে...' : spinsLeft === 0 ? 'স্পিন শেষ' : !nextSpinReady ? '২ ঘণ্টা অপেক্ষা করুন' : 'স্পিন করুন'}
         </button>
       </div>
     </div>
