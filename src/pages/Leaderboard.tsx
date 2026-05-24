@@ -124,18 +124,18 @@ export default function Leaderboard() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center p-10"><Loader2 className="w-8 h-8 animate-spin text-indigo-500" /></div>
+        <div className="flex justify-center p-10"><Loader2 className="w-8 h-8 animate-spin text-[#038758]" /></div>
       ) : (
         <>
           {/* Target Progress Card */}
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 mb-6 shadow-xl relative overflow-hidden">
              <div className="absolute top-0 right-0 p-4 opacity-10">
-               <Gift className="w-24 h-24 text-indigo-500" />
+               <Gift className="w-24 h-24 text-[#038758]" />
              </div>
              
              <div className="relative z-10">
                <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                 <Gift className="w-5 h-5 text-indigo-400" />
+                 <Gift className="w-5 h-5 text-[#038758]" />
                  Super Bonus
                </h3>
                <p className="text-sm text-slate-400 mt-1">
@@ -149,7 +149,7 @@ export default function Leaderboard() {
                  </div>
                  <div className="h-3 bg-slate-800 rounded-full overflow-hidden mb-5">
                    <div 
-                     className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-1000 ease-out"
+                     className="h-full bg-gradient-to-r from-[#038758] to-[#038758] transition-all duration-1000 ease-out"
                      style={{ width: `${progressPercentage}%` }}
                    />
                  </div>
@@ -186,7 +186,7 @@ export default function Leaderboard() {
                  </div>
                ) : (
                  leaders.map((leader, index) => (
-                   <div key={leader.id} className={`p-4 flex items-center gap-4 ${leader.id === telegramId ? 'bg-indigo-500/10' : ''}`}>
+                   <div key={leader.id} className={`p-4 flex items-center gap-4 ${leader.id === telegramId ? 'bg-[#038758]/10' : ''}`}>
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
                         index === 0 ? 'bg-yellow-500/20 text-yellow-500' :
                         index === 1 ? 'bg-slate-400/20 text-slate-300' :
@@ -202,9 +202,9 @@ export default function Leaderboard() {
                         </p>
                       </div>
                       
-                      <div className="flex items-center gap-1.5 bg-indigo-500/10 px-3 py-1.5 rounded-xl">
-                        <Users className="w-4 h-4 text-indigo-400" />
-                        <span className="font-bold text-indigo-400">{leader.count}</span>
+                      <div className="flex items-center gap-1.5 bg-[#038758]/10 px-3 py-1.5 rounded-xl">
+                        <Users className="w-4 h-4 text-[#038758]" />
+                        <span className="font-bold text-[#038758]">{leader.count}</span>
                       </div>
                    </div>
                  ))

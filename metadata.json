@@ -1,6 +1,6 @@
 {
-  "name": "",
-  "description": "",
+  "name": "xN Coin",
+  "description": "Daily Earnings app",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

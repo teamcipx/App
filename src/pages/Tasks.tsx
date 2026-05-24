@@ -234,16 +234,18 @@ export default function Tasks() {
   };
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-indigo-500" /></div>;
+    return <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-[#038758]" /></div>;
   }
 
   return (
-    <div className="p-4 max-w-lg mx-auto pb-8 animate-in fade-in zoom-in-95 duration-300">
-      <div className="flex items-center gap-3 mb-6 pt-4">
-        <button onClick={() => navigate('/')} className="p-2.5 bg-slate-900 border border-slate-700/50 rounded-2xl hover:bg-slate-800 transition-colors">
-          <ArrowLeft className="w-5 h-5 text-white" />
-        </button>
-        <h1 className="text-2xl font-extrabold text-white">ডেইলি টাস্ক</h1>
+    <div className="max-w-md mx-auto pb-8 animate-in fade-in zoom-in-95 duration-300 bg-slate-50 min-h-screen">
+      <div className="bg-white border-b border-slate-100 flex items-center justify-between p-4 sticky top-0 z-10 shadow-sm mb-6">
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate('/')} className="p-2.5 bg-white border border-slate-200 rounded-2xl hover:bg-slate-50 text-slate-700 transition-colors shadow-sm">
+            <ArrowLeft className="w-5 h-5 text-slate-700" />
+          </button>
+          <h1 className="text-2xl font-extrabold text-slate-800">ডেইলি টাস্ক</h1>
+        </div>
       </div>
 
       <input 
@@ -254,49 +256,49 @@ export default function Tasks() {
         style={{ display: 'none' }} 
       />
 
-      <div className="space-y-4">
+      <div className="space-y-4 px-4">
         {tasks.map(task => {
           const { status, timeRemaining } = getTaskStatus(task.id);
           const isActive = activeTaskTimer?.id === task.id;
           const isFailed = failedTasks.includes(task.id);
 
           return (
-            <div key={task.id} className="bg-slate-900/50 backdrop-blur-sm border border-slate-700/50 rounded-3xl p-5 shadow-lg relative overflow-hidden">
+            <div key={task.id} className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm relative overflow-hidden">
                {isActive && (
-                 <div className="absolute inset-0 bg-indigo-500/10 z-0 animate-pulse"></div>
+                 <div className="absolute inset-0 bg-[#038758]/10 z-0 animate-pulse"></div>
                )}
                <div className="relative z-10 flex items-start gap-4">
-                  <div className={`p-3 rounded-2xl border ${status === 'available' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' : 'bg-slate-800 text-slate-500 border-slate-700'}`}>
+                  <div className={`p-3 rounded-2xl border ${status === 'available' ? 'bg-[#038758]/10 text-[#038758] border-[#038758]/20' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
                     {status === 'available' ? <ListTodo className="w-6 h-6" /> : <Clock className="w-6 h-6" />}
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-slate-100 font-bold mb-1 leading-tight">{task.title.replace('[PLAYSTORE]', '').trim()}</h3>
-                    <div className="flex items-center gap-3 text-sm">
-                      <span className="text-indigo-400 font-bold bg-indigo-500/10 px-2 py-0.5 rounded-lg border border-indigo-500/20">+{task.reward} xNC</span>
+                    <h3 className="text-slate-800 font-bold mb-1 leading-tight">{task.title.replace('[PLAYSTORE]', '').trim()}</h3>
+                    <div className="flex items-center gap-3 text-sm mt-1">
+                      <span className="text-[#038758] font-bold bg-[#038758]/10 px-2 py-0.5 rounded-lg border border-[#038758]/20">+{task.reward} xNC</span>
                       <span className="text-slate-500 flex items-center gap-1"><Clock className="w-3 h-3" /> {task.wait_time}s</span>
                     </div>
                   </div>
                </div>
                
-               <div className="relative z-10 mt-4 pt-4 border-t border-slate-800/50 flex items-center justify-between">
+               <div className="relative z-10 mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
                   {status === 'available' ? (
                     isActive ? (
-                      <button disabled className="w-full bg-slate-800 text-indigo-400 py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 border border-indigo-500/30">
+                      <button disabled className="w-full bg-slate-100 text-[#038758] py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 border border-slate-200">
                         <Loader2 className="w-5 h-5 animate-spin" /> চেকিং... {activeTaskTimer.timeLeft}s
                       </button>
                     ) : uploadingTask === task.id ? (
-                      <button disabled className="w-full bg-slate-800 text-indigo-400 py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 border border-indigo-500/30">
+                      <button disabled className="w-full bg-slate-100 text-[#038758] py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 border border-slate-200">
                         <Loader2 className="w-5 h-5 animate-spin" /> আপলোড হচ্ছে...
                       </button>
                     ) : (
-                      <button onClick={() => handleStartTask(task)} className={`w-full ${isFailed ? 'bg-amber-500/20 border border-amber-500/30 text-amber-400 hover:bg-amber-500/30' : 'bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-400 hover:to-indigo-500 text-white'} py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-transform active:scale-[0.98] shadow-md`}>
+                      <button onClick={() => handleStartTask(task)} className={`w-full ${isFailed ? 'bg-amber-100 border border-amber-200 text-amber-600 hover:bg-amber-200' : 'bg-[#038758] hover:bg-[#026b46] text-white'} py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-transform active:scale-[0.98] shadow-sm`}>
                         {task.title.includes('[PLAYSTORE]') ? 'স্ক্রিনশট আপলোড করুন' : isFailed ? 'আবার শুরু করুন' : 'টাস্ক শুরু করুন'} 
                         {task.title.includes('[PLAYSTORE]') ? <Upload className="w-5 h-5" /> : <ExternalLink className="w-5 h-5" />}
                       </button>
                     )
                   ) : (
-                    <button disabled className="w-full bg-slate-950/50 text-slate-500 py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 border border-slate-800/50">
-                      <CheckCircle className="w-5 h-5 text-emerald-500" /> সম্পন্ন (ফিরে আসুন {formatTimeRemaining(timeRemaining)})
+                    <button disabled className="w-full bg-slate-50 text-slate-500 py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 border border-slate-200">
+                      <CheckCircle className="w-5 h-5 text-[#038758]" /> সম্পন্ন (ফিরে আসুন {formatTimeRemaining(timeRemaining)})
                     </button>
                   )}
                </div>
@@ -305,9 +307,9 @@ export default function Tasks() {
         })}
 
         {tasks.length === 0 && (
-          <div className="text-center py-12 bg-slate-900/50 backdrop-blur-sm border border-slate-700/50 rounded-3xl">
-            <ListTodo className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-            <p className="text-slate-400 font-medium">এখনও কোনো টাস্ক নেই।</p>
+          <div className="text-center py-12 bg-white border border-slate-200 rounded-3xl">
+            <ListTodo className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+            <p className="text-slate-500 font-medium">এখনও কোনো টাস্ক নেই।</p>
           </div>
         )}
       </div>

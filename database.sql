@@ -76,6 +76,24 @@ CREATE TABLE IF NOT EXISTS reviews (
   created_at timestamp with time zone DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS promo_codes (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  code text NOT NULL UNIQUE,
+  reward integer NOT NULL,
+  max_uses integer NOT NULL DEFAULT 100,
+  current_uses integer NOT NULL DEFAULT 0,
+  is_active boolean NOT NULL DEFAULT true,
+  created_at timestamp with time zone DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS user_promos (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  telegram_id bigint NOT NULL REFERENCES users(telegram_id),
+  promo_id uuid NOT NULL REFERENCES promo_codes(id) ON DELETE CASCADE,
+  created_at timestamp with time zone DEFAULT now(),
+  UNIQUE(telegram_id, promo_id)
+);
+
 -- Enable realtime for support_messages
 ALTER PUBLICATION supabase_realtime ADD TABLE support_messages;
 ALTER PUBLICATION supabase_realtime ADD TABLE reviews;

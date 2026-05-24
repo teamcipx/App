@@ -159,7 +159,7 @@ export default function Reviews() {
         </button>
         <button 
           onClick={() => setShowModal(true)}
-          className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2"
+          className="bg-[#038758] hover:bg-[#038758] text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2"
         >
           <MessageSquare className="w-4 h-4" /> Write Review
         </button>
@@ -168,13 +168,13 @@ export default function Reviews() {
       <div className="mb-6">
         <h1 className="text-2xl font-extrabold text-white mb-2 ml-1">পেমেন্ট প্রুফ ও রিভিউ</h1>
         <div className="flex items-center justify-between ml-1">
-          <p className="text-indigo-200/60 text-sm">আমাদের ইউজারদের রিভিউগুলো দেখুন!</p>
-          {!loading && <span className="bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs px-2.5 py-1 rounded-lg font-medium">মোট রিভিউ: {reviews.length}</span>}
+          <p className="text-[#038758]/70/60 text-sm">আমাদের ইউজারদের রিভিউগুলো দেখুন!</p>
+          {!loading && <span className="bg-[#038758]/20 border border-[#038758]/30 text-[#038758] text-xs px-2.5 py-1 rounded-lg font-medium">মোট রিভিউ: {reviews.length}</span>}
         </div>
       </div>
 
       {loading ? (
-        <div className="flex-1 flex justify-center items-center"><Loader2 className="w-8 h-8 animate-spin text-indigo-500" /></div>
+        <div className="flex-1 flex justify-center items-center"><Loader2 className="w-8 h-8 animate-spin text-[#038758]" /></div>
       ) : (
         <div className="space-y-4">
           {reviews.length === 0 ? (
@@ -185,7 +185,7 @@ export default function Reviews() {
             reviews.map(review => (
               <div key={review.id} className="bg-slate-900/50 backdrop-blur-sm border border-slate-700/50 rounded-3xl p-5 shadow-lg shadow-black/20">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 bg-indigo-500/20 rounded-full flex items-center justify-center font-bold text-indigo-400 border border-indigo-500/30">
+                  <div className="w-10 h-10 bg-[#038758]/20 rounded-full flex items-center justify-center font-bold text-[#038758] border border-[#038758]/30">
                     {review.name.charAt(0).toUpperCase()}
                   </div>
                   <div>
@@ -229,7 +229,7 @@ export default function Reviews() {
                     value={newName} 
                     onChange={(e) => setNewName(e.target.value)} 
                     placeholder="Name (Admin can fake)"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-[#038758]"
                   />
                 </div>
               )}
@@ -241,7 +241,7 @@ export default function Reviews() {
                   value={newReview} 
                   onChange={(e) => setNewReview(e.target.value)} 
                   placeholder="Tell us what you think..."
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 h-28 resize-none"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#038758] h-28 resize-none"
                 />
               </div>
 
@@ -263,7 +263,7 @@ export default function Reviews() {
                   <button 
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="w-full bg-slate-950 border border-slate-800 border-dashed rounded-xl p-4 flex flex-col items-center justify-center text-slate-400 hover:text-indigo-400 hover:border-indigo-500/50 transition-colors"
+                    className="w-full bg-slate-950 border border-slate-800 border-dashed rounded-xl p-4 flex flex-col items-center justify-center text-slate-400 hover:text-[#038758] hover:border-[#038758]/50 transition-colors"
                   >
                      <ImageIcon className="w-6 h-6 mb-2 opacity-50" />
                      <span className="text-sm font-medium">Upload Image</span>
@@ -282,7 +282,7 @@ export default function Reviews() {
               <button 
                 type="submit" 
                 disabled={!newReview.trim() || uploading}
-                className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-transform active:scale-[0.98]"
+                className="w-full bg-[#038758] hover:bg-[#038758] disabled:opacity-50 disabled:cursor-not-allowed text-white py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-transform active:scale-[0.98]"
               >
                 {uploading ? (
                   <><Loader2 className="w-5 h-5 animate-spin" /> Uploading...</>

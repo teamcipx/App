@@ -70,40 +70,40 @@ export default function Scratch() {
     toast.success(`You won ${reward} coins!`);
   };
 
-  if (loading) return <div className="flex justify-center p-10"><Loader2 className="w-8 h-8 animate-spin text-indigo-500" /></div>;
+  if (loading) return <div className="flex justify-center p-10"><Loader2 className="w-8 h-8 animate-spin text-[#038758]" /></div>;
 
   const scratchesLeft = 5 - (user?.customState?.scratchesToday || 0);
 
   return (
-    <div className="p-4 max-w-lg mx-auto relative min-h-screen flex flex-col">
-      <div className="flex items-center justify-between mb-8 pt-2">
-        <button onClick={() => navigate('/')} className="p-2 bg-slate-900 border border-slate-800 rounded-full text-slate-300 hover:text-white transition-colors">
+    <div className="max-w-md mx-auto relative bg-slate-50 min-h-screen flex flex-col pt-8 pb-8">
+      <div className="flex items-center justify-between mb-8 pt-2 px-4">
+        <button onClick={() => navigate('/')} className="p-2.5 bg-white border border-slate-200 rounded-2xl hover:bg-slate-50 transition-colors text-slate-700 shadow-sm">
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <div className="bg-slate-900 border border-slate-800 px-4 py-2 rounded-xl text-amber-400 font-bold flex items-center gap-2">
+        <div className="bg-white border border-slate-200 px-4 py-2 rounded-xl text-[#038758] font-bold flex items-center gap-2 shadow-sm">
           <Star className="w-4 h-4" /> {user?.balance || 0}
         </div>
       </div>
 
-      <div className="text-center mb-10">
-        <h1 className="text-3xl font-bold text-white mb-2">Scratch & Earn</h1>
-        <p className="text-slate-400 text-sm">Scratch the card to win up to 200 coins.</p>
+      <div className="text-center mb-10 px-4">
+        <h1 className="text-3xl font-extrabold text-slate-800 mb-2">স্ক্র্যাচ কার্ড</h1>
+        <p className="text-slate-500 text-sm">ঘষে জিতে নিন ২০০ কয়েন পর্যন্ত।</p>
         <div className="mt-4 flex justify-center gap-4 text-sm font-medium">
-           <span className="bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg text-slate-300">Cards Left: <span className="text-white">{scratchesLeft}</span></span>
+           <span className="bg-[#038758]/10 border border-[#038758]/20 px-3 py-1.5 rounded-lg text-[#038758]">কার্ড বাকি: <span className="font-bold">{scratchesLeft}</span></span>
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col items-center justify-center -mt-10">
+      <div className="flex-1 flex flex-col items-center justify-center -mt-10 px-4">
         <div 
           onClick={handleScratch}
-          className={`relative w-72 h-48 rounded-2xl overflow-hidden cursor-pointer shadow-2xl transition-all duration-500 ${scratched ? '' : 'hover:scale-105 active:scale-95'}`}
+          className={`relative w-full max-w-[280px] h-48 rounded-2xl overflow-hidden cursor-pointer shadow-md transition-all duration-500 ${scratched ? '' : 'hover:scale-105 active:scale-95'}`}
         >
           {/* Back of Card (Result) */}
-          <div className="absolute inset-0 bg-slate-900 border-2 border-amber-500/50 flex flex-col items-center justify-center">
+          <div className="absolute inset-0 bg-white border-2 border-amber-400 flex flex-col items-center justify-center">
             {scratched ? (
               <div className="animate-in zoom-in spin-in-2 duration-500 flex flex-col items-center">
                 <span className="text-5xl font-black text-amber-500 mb-2">+{currentReward}</span>
-                <span className="text-slate-400 font-bold uppercase tracking-widest text-sm">Coins Won</span>
+                <span className="text-slate-400 font-bold uppercase tracking-widest text-sm">কয়েন জিতেছেন</span>
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center opacity-20">
@@ -115,11 +115,11 @@ export default function Scratch() {
           
           {/* Front of Card (Coating to scratch off) */}
           <div 
-            className={`absolute inset-0 bg-gradient-to-br from-slate-600 to-slate-800 flex items-center justify-center transition-all duration-700 origin-center pointer-events-none ${scratched ? 'opacity-0 scale-150 rotate-12' : 'opacity-100 scale-100'}`}
+            className={`absolute inset-0 bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center transition-all duration-700 origin-center pointer-events-none ${scratched ? 'opacity-0 scale-150 rotate-12' : 'opacity-100 scale-100'}`}
           >
             <div className="text-center">
               <Star className="w-12 h-12 text-slate-400 mx-auto mb-2 opacity-50" />
-              <p className="text-white font-black tracking-widest text-xl opacity-80 mix-blend-overlay">TAP TO SCRATCH</p>
+              <p className="text-slate-600 font-black tracking-widest text-xl opacity-80 mix-blend-overlay">ঘষুন</p>
             </div>
             
             {/* Texture overlay */}
@@ -130,9 +130,9 @@ export default function Scratch() {
         {scratched && scratchesLeft > 0 && (
           <button 
             onClick={() => { setScratched(false); setCurrentReward(null); }}
-            className="mt-12 text-indigo-400 hover:text-indigo-300 font-bold px-6 py-3 bg-indigo-500/10 rounded-xl transition-colors"
+            className="mt-12 text-[#038758] font-bold px-6 py-3 bg-[#038758]/10 rounded-xl transition-colors hover:bg-[#038758]/20"
           >
-            Next Card &rarr;
+            পরবর্তী কার্ড &rarr;
           </button>
         )}
       </div>

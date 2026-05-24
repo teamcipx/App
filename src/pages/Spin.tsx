@@ -90,27 +90,27 @@ export default function Spin() {
     }, 4000);
   };
 
-  if (loading) return <div className="flex justify-center p-10"><Loader2 className="w-8 h-8 animate-spin text-indigo-500" /></div>;
+  if (loading) return <div className="flex justify-center p-10"><Loader2 className="w-8 h-8 animate-spin text-[#038758]" /></div>;
 
   const spinsLeft = 4 - (user?.customState?.spinsToday || 0);
   const nextSpinReady = (Date.now() - (user?.customState?.lastSpinTime || 0)) >= 2 * 60 * 60 * 1000 || user?.customState?.spinsToday === 0;
 
   return (
-    <div className="p-4 max-w-lg mx-auto relative min-h-screen flex flex-col pt-8">
-      <div className="flex items-center justify-between mb-8 pt-2">
-        <button onClick={() => navigate('/')} className="p-2.5 bg-slate-900 border border-slate-700/50 rounded-2xl hover:bg-slate-800 transition-colors text-white">
+    <div className="max-w-md mx-auto relative bg-slate-50 min-h-screen flex flex-col pt-8 pb-8">
+      <div className="flex items-center justify-between mb-8 pt-2 px-4">
+        <button onClick={() => navigate('/')} className="p-2.5 bg-white border border-slate-200 rounded-2xl hover:bg-slate-50 transition-colors text-slate-700 shadow-sm">
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <div className="bg-indigo-500/10 border border-indigo-500/20 px-4 py-2 rounded-xl text-indigo-400 font-bold shadow-inner">
+        <div className="bg-white border border-slate-200 px-4 py-2 rounded-xl text-[#038758] font-bold shadow-sm">
           {user?.balance || 0} xNC
         </div>
       </div>
 
-      <div className="text-center mb-10">
-        <h1 className="text-3xl font-extrabold text-white mb-2">ডেইলি স্পিন</h1>
-        <p className="text-indigo-200/60 text-sm">স্পিন করে জিতুন ২০০ কয়েন পর্যন্ত।</p>
+      <div className="text-center mb-10 px-4">
+        <h1 className="text-3xl font-extrabold text-slate-800 mb-2">ডেইলি স্পিন</h1>
+        <p className="text-slate-500 text-sm">স্পিন করে জিতুন ২০০ কয়েন পর্যন্ত।</p>
         <div className="mt-4 flex justify-center gap-4 text-sm font-medium">
-           <span className="bg-indigo-500/10 border border-indigo-500/20 px-3 py-1.5 rounded-lg text-indigo-300">স্পিন বাকি: <span className="text-white font-bold">{spinsLeft}</span></span>
+           <span className="bg-[#038758]/10 border border-[#038758]/20 px-3 py-1.5 rounded-lg text-[#038758]">স্পিন বাকি: <span className="font-bold">{spinsLeft}</span></span>
         </div>
       </div>
 
@@ -141,14 +141,14 @@ export default function Spin() {
                );
              })}
              {/* Center pin */}
-             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-slate-900 border-2 border-indigo-400 rounded-full z-10 shadow-lg"></div>
+             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-white border-4 border-[#038758] rounded-full z-10 shadow-lg"></div>
           </div>
         </div>
 
         <button 
           disabled={spinning || spinsLeft === 0 || (!nextSpinReady && spinsLeft > 0)}
           onClick={handleSpin}
-          className="mt-12 bg-gradient-to-r from-indigo-500 to-indigo-600 w-full sm:w-auto px-16 hover:from-indigo-400 hover:to-indigo-500 text-white py-4 rounded-3xl font-extrabold flex items-center justify-center gap-3 transition-transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-indigo-500/20 text-lg border border-indigo-400/20"
+          className="mt-12 bg-[#038758] hover:bg-[#026b46] mx-4 w-[calc(100%-2rem)] sm:w-auto px-16 text-white py-4 rounded-3xl font-extrabold flex items-center justify-center gap-3 transition-transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-md text-lg"
         >
           {spinning ? 'ঘুরছে...' : spinsLeft === 0 ? 'স্পিন শেষ' : !nextSpinReady ? '২ ঘণ্টা অপেক্ষা করুন' : 'স্পিন করুন'}
         </button>

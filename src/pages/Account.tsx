@@ -53,7 +53,7 @@ export default function Account() {
   };
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-indigo-500" /></div>;
+    return <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-[#038758]" /></div>;
   }
 
   return (
@@ -66,12 +66,12 @@ export default function Account() {
       </div>
 
       <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 mb-6 shadow-xl text-center">
-        <div className="w-20 h-20 bg-indigo-600 rounded-full mx-auto flex items-center justify-center shadow-[0_0_30px_rgba(79,70,229,0.5)] mb-4">
+        <div className="w-20 h-20 bg-[#038758] rounded-full mx-auto flex items-center justify-center shadow-[0_0_30px_rgba(79,70,229,0.5)] mb-4">
           <User className="w-10 h-10 text-white" />
         </div>
         <h2 className="text-2xl font-bold text-white mb-1">{userName}</h2>
         <p className="text-slate-400 text-sm mb-1">Telegram ID</p>
-        <p className="text-lg font-mono text-indigo-400 mb-6">{telegramId}</p>
+        <p className="text-lg font-mono text-[#038758] mb-6">{telegramId}</p>
 
         <div className="grid grid-cols-2 gap-4 border-t border-slate-800 pt-6">
           <div>
@@ -80,7 +80,7 @@ export default function Account() {
           </div>
           <div>
             <p className="text-slate-400 text-xs font-medium mb-1">Reward Per Invite</p>
-            <p className="text-2xl font-bold tracking-tight text-indigo-400">500 <span className="text-sm">xNC</span></p>
+            <p className="text-2xl font-bold tracking-tight text-[#038758]">500 <span className="text-sm">xNC</span></p>
           </div>
         </div>
       </div>
@@ -95,7 +95,7 @@ export default function Account() {
           <span className="font-mono text-xs text-slate-300 truncate">{referralLink}</span>
           <button 
             onClick={copyLink}
-            className={`p-2 rounded-xl transition-colors shrink-0 ${copied ? 'bg-green-500/20 text-green-400' : 'bg-indigo-600 text-white hover:bg-indigo-500'}`}
+            className={`p-2 rounded-xl transition-colors shrink-0 ${copied ? 'bg-green-500/20 text-green-400' : 'bg-[#038758] text-white hover:bg-[#038758]'}`}
           >
             {copied ? <span className="text-xs font-bold px-2">Copied!</span> : <Copy className="w-4 h-4" />}
           </button>
@@ -112,7 +112,7 @@ export default function Account() {
                   <p className="text-sm font-mono text-slate-300">ID: {ref.telegram_id}</p>
                   <p className="text-xs text-slate-500 mt-1">Joined: {new Date(ref.created_at).toLocaleDateString()}</p>
                 </div>
-                <div className="bg-indigo-500/10 text-indigo-400 text-xs font-bold px-2 py-1 rounded-lg">
+                <div className="bg-[#038758]/10 text-[#038758] text-xs font-bold px-2 py-1 rounded-lg">
                   +500
                 </div>
               </div>

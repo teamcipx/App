@@ -92,18 +92,18 @@ export default function WithdrawDialog({
   const calculatedValue = parseInt(amount) * (settings?.coin_rate || 0);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-slate-950/80 backdrop-blur-sm">
-      <div className="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in slide-in-from-bottom-5 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200">
-        <div className="flex justify-between items-center p-6 border-b border-slate-800">
-          <h2 className="text-xl font-bold text-white">Withdraw Funds</h2>
-          <button onClick={onClose} className="text-slate-500 hover:text-white bg-slate-800 p-2 rounded-full">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-slate-50/80 backdrop-blur-sm">
+      <div className="bg-white border-t sm:border border-slate-200 rounded-t-3xl sm:rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in slide-in-from-bottom-5 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200">
+        <div className="flex justify-between items-center p-6 border-b border-slate-200">
+          <h2 className="text-xl font-bold text-slate-800">Withdraw Funds</h2>
+          <button onClick={onClose} className="text-slate-500 hover:text-slate-800 bg-slate-800 p-2 rounded-full">
             <X className="w-5 h-5" />
           </button>
         </div>
         
         <form onSubmit={handleSubmit} className="p-6">
           <div className="mb-6">
-            <label className="block text-sm font-medium text-slate-400 mb-2">Select Method</label>
+            <label className="block text-sm font-medium text-slate-500 mb-2">Select Method</label>
             <div className="grid grid-cols-2 gap-3">
               {METHODS.map(m => (
                 <button
@@ -112,8 +112,8 @@ export default function WithdrawDialog({
                   onClick={() => setMethod(m.id)}
                   className={`py-3 px-4 rounded-xl font-medium transition-colors border ${
                     method === m.id 
-                    ? 'bg-indigo-600 border-indigo-500 text-white shadow-[0_0_15px_rgba(79,70,229,0.3)]' 
-                    : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700'
+                    ? 'bg-[#038758] border-[#038758] text-slate-800 shadow-[0_0_15px_rgba(79,70,229,0.3)]' 
+                    : 'bg-slate-50 border-slate-200 text-slate-500 hover:border-slate-300'
                   }`}
                 >
                   {m.name}
@@ -123,43 +123,44 @@ export default function WithdrawDialog({
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-slate-400 mb-2">Withdraw Amount (Coins)</label>
+            <label className="block text-sm font-medium text-slate-500 mb-2">Withdraw Amount (Coins)</label>
             <div className="relative">
               <input
                 type="number"
                 value={amount}
                 onChange={e => setAmount(e.target.value)}
                 placeholder={`Min ${settings?.min_withdraw || 0}`}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#038758] font-mono"
               />
               <button 
                 type="button" 
                 onClick={() => setAmount(user.balance.toString())}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded font-medium hover:bg-slate-700"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs bg-[#038758]/10 text-[#038758] px-2 py-1 rounded font-medium hover:bg-[#038758]/20"
               >
                 MAX
               </button>
             </div>
             {amount && !isNaN(parseInt(amount)) && (
-              <p className="text-xs text-indigo-400 mt-2 font-mono flex items-center gap-1">
+              <p className="text-xs text-[#038758] mt-2 font-mono flex items-center gap-1">
                 You will receive ~ {calculatedValue.toFixed(2)} USD
               </p>
             )}
+            <p className="text-xs text-slate-500 mt-2 font-medium">1 USD = 121 ৳</p>
           </div>
 
           <div className="mb-6">
-            <label className="block text-sm font-medium text-slate-400 mb-2">Account Details</label>
+            <label className="block text-sm font-medium text-slate-500 mb-2">Account Details</label>
             <input
               type="text"
               value={details}
               onChange={e => setDetails(e.target.value)}
               placeholder={method === 'binance' ? "Binance Pay ID / Email" : "Phone Number"}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#038758]"
             />
           </div>
 
           {error && (
-            <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-3 rounded-xl mb-6 text-sm">
+            <div className="bg-red-50 border border-red-200 text-red-600 p-3 rounded-xl mb-6 text-sm">
               {error}
             </div>
           )}
@@ -167,7 +168,7 @@ export default function WithdrawDialog({
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-indigo-600 hover:bg-indigo-500 text-white disabled:opacity-50 disabled:cursor-not-allowed py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg shadow-indigo-600/25"
+            className="w-full bg-[#038758] hover:bg-[#026b46] text-white disabled:opacity-50 disabled:cursor-not-allowed py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-md"
           >
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
               <>

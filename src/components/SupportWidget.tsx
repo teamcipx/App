@@ -156,7 +156,7 @@ export default function SupportWidget() {
       {!isOpen && (
         <button 
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-24 right-4 sm:bottom-6 sm:right-6 p-4 bg-indigo-600 text-white rounded-full shadow-lg hover:bg-indigo-500 transition-transform active:scale-95 z-50 flex items-center justify-center"
+          className="fixed bottom-24 right-4 sm:bottom-6 sm:right-6 p-4 bg-[#038758] text-white rounded-full shadow-lg hover:bg-[#038758] transition-transform active:scale-95 z-50 flex items-center justify-center"
         >
           <MessageSquare className="w-6 h-6" />
         </button>
@@ -167,7 +167,7 @@ export default function SupportWidget() {
           <div className="flex items-center justify-between p-4 border-b border-slate-800 bg-slate-900 sm:rounded-t-2xl">
             <div>
               <h3 className="font-bold text-white flex items-center gap-2">
-                <MessageSquare className="w-4 h-4 text-indigo-400" />
+                <MessageSquare className="w-4 h-4 text-[#038758]" />
                 Support Chat
               </h3>
               <p className="text-xs text-slate-400 mt-1">We usually reply within a few hours.</p>
@@ -187,7 +187,7 @@ export default function SupportWidget() {
               <div key={i} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[80%] rounded-2xl px-4 py-2 text-sm ${
                   msg.sender === 'user' 
-                  ? 'bg-indigo-600 text-white rounded-br-sm' 
+                  ? 'bg-[#038758] text-white rounded-br-sm' 
                   : 'bg-slate-800 text-slate-200 rounded-bl-sm'
                 }`}>
                   {msg.image_url && (
@@ -212,7 +212,7 @@ export default function SupportWidget() {
               type="button"
               disabled={uploading}
               onClick={() => fileInputRef.current?.click()}
-              className="text-slate-400 hover:text-indigo-400 p-2 transition-colors"
+              className="text-slate-400 hover:text-[#038758] p-2 transition-colors"
             >
                {uploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ImageIcon className="w-5 h-5" />}
             </button>
@@ -221,12 +221,12 @@ export default function SupportWidget() {
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               placeholder="Type your message..."
-              className="flex-1 bg-slate-950 text-white border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500"
+              className="flex-1 bg-slate-950 text-white border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#038758]"
             />
             <button 
               type="submit" 
               disabled={!newMessage.trim()}
-              className="bg-indigo-600 text-white p-2.5 rounded-xl hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+              className="bg-[#038758] text-white p-2.5 rounded-xl hover:bg-[#038758] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
             >
               <Send className="w-5 h-5" />
             </button>
