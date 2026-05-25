@@ -57,45 +57,45 @@ export default function Account() {
   }
 
   return (
-    <div className="p-4 max-w-lg mx-auto pb-20">
+    <div className="max-w-md mx-auto pt-6 px-4 bg-slate-50 min-h-screen pb-32 pb-20">
       <div className="flex items-center gap-4 mb-8">
-        <button onClick={() => navigate('/')} className="p-2 bg-slate-900 rounded-full text-slate-300 hover:text-white transition-colors">
+        <button onClick={() => navigate('/')} className="p-2.5 bg-white border border-slate-200 rounded-2xl shadow-sm text-slate-600 hover:text-slate-800 transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="text-2xl font-bold text-white">Account & Referrals</h1>
+        <h1 className="text-2xl font-bold text-slate-800">Account & Referrals</h1>
       </div>
 
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 mb-6 shadow-xl text-center">
+      <div className="bg-white border border-slate-200 rounded-3xl p-6 mb-6 shadow-xl text-center">
         <div className="w-20 h-20 bg-[#038758] rounded-full mx-auto flex items-center justify-center shadow-[0_0_30px_rgba(79,70,229,0.5)] mb-4">
-          <User className="w-10 h-10 text-white" />
+          <User className="w-10 h-10 text-slate-800" />
         </div>
-        <h2 className="text-2xl font-bold text-white mb-1">{userName}</h2>
-        <p className="text-slate-400 text-sm mb-1">Telegram ID</p>
+        <h2 className="text-2xl font-bold text-slate-800 mb-1">{userName}</h2>
+        <p className="text-slate-500 text-sm mb-1">Telegram ID</p>
         <p className="text-lg font-mono text-[#038758] mb-6">{telegramId}</p>
 
-        <div className="grid grid-cols-2 gap-4 border-t border-slate-800 pt-6">
+        <div className="grid grid-cols-2 gap-4 border-t border-slate-200 pt-6">
           <div>
-            <p className="text-slate-400 text-xs font-medium mb-1">Total Referrals</p>
-            <p className="text-2xl font-bold tracking-tight text-white">{referrals}</p>
+            <p className="text-slate-500 text-xs font-medium mb-1">Total Referrals</p>
+            <p className="text-2xl font-bold tracking-tight text-slate-800">{referrals}</p>
           </div>
           <div>
-            <p className="text-slate-400 text-xs font-medium mb-1">Reward Per Invite</p>
+            <p className="text-slate-500 text-xs font-medium mb-1">Reward Per Invite</p>
             <p className="text-2xl font-bold tracking-tight text-[#038758]">500 <span className="text-sm">xNC</span></p>
           </div>
         </div>
       </div>
 
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl mb-6">
-        <h2 className="text-lg font-bold text-white mb-2">Invite Friends</h2>
-        <p className="text-slate-400 text-sm mb-6">
+      <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl mb-6">
+        <h2 className="text-lg font-bold text-slate-800 mb-2">Invite Friends</h2>
+        <p className="text-slate-500 text-sm mb-6">
           Share your referral link with your friends. You both will get 500 Coins! Plus, you'll earn 10% commission when they withdraw.
         </p>
 
-        <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 flex items-center justify-between gap-4">
-          <span className="font-mono text-xs text-slate-300 truncate">{referralLink}</span>
+        <div className="bg-slate-950 border border-slate-200 rounded-2xl p-4 flex items-center justify-between gap-4">
+          <span className="font-mono text-xs text-slate-600 truncate">{referralLink}</span>
           <button 
             onClick={copyLink}
-            className={`p-2 rounded-xl transition-colors shrink-0 ${copied ? 'bg-green-500/20 text-green-400' : 'bg-[#038758] text-white hover:bg-[#038758]'}`}
+            className={`p-2 rounded-xl transition-colors shrink-0 ${copied ? 'bg-green-500/20 text-green-400' : 'bg-[#038758] text-slate-800 hover:bg-[#038758]'}`}
           >
             {copied ? <span className="text-xs font-bold px-2">Copied!</span> : <Copy className="w-4 h-4" />}
           </button>
@@ -103,13 +103,13 @@ export default function Account() {
       </div>
 
       {referredUsers.length > 0 && (
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl">
-          <h2 className="text-lg font-bold text-white mb-4">Your Referrals</h2>
+        <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl">
+          <h2 className="text-lg font-bold text-slate-800 mb-4">Your Referrals</h2>
           <div className="space-y-3 max-h-64 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
             {referredUsers.map((ref, idx) => (
-              <div key={idx} className="bg-slate-950 border border-slate-800 p-3 rounded-xl flex items-center justify-between">
+              <div key={idx} className="bg-slate-950 border border-slate-200 p-3 rounded-xl flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-mono text-slate-300">ID: {ref.telegram_id}</p>
+                  <p className="text-sm font-mono text-slate-600">ID: {ref.telegram_id}</p>
                   <p className="text-xs text-slate-500 mt-1">Joined: {new Date(ref.created_at).toLocaleDateString()}</p>
                 </div>
                 <div className="bg-[#038758]/10 text-[#038758] text-xs font-bold px-2 py-1 rounded-lg">

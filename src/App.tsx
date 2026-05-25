@@ -8,6 +8,7 @@ import { useEffect } from 'react';
 import WebApp from '@twa-dev/sdk';
 import { Toaster } from 'sonner';
 import SupportWidget from './components/SupportWidget';
+import BottomNav from './components/BottomNav';
 
 import Leaderboard from './pages/Leaderboard';
 import Spin from './pages/Spin';
@@ -46,6 +47,7 @@ export default function App() {
           <Route path="/history" element={<History />} />
           <Route path="/reviews" element={<Reviews />} />
         </Routes>
+        <BottomNav />
         <SupportWidget />
       </div>
     </Router>

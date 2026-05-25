@@ -109,15 +109,15 @@ export default function Leaderboard() {
   const progressPercentage = Math.min((userReferrals / TARGET_REFERRALS) * 100, 100);
 
   return (
-    <div className="p-4 max-w-lg mx-auto relative min-h-screen">
+    <div className="max-w-md mx-auto pt-6 px-4 bg-slate-50 min-h-screen pb-32 animate-in relative min-h-screen">
       <div className="flex items-center gap-3 mb-6 pt-2">
         <button 
           onClick={() => navigate('/')}
-          className="p-2 bg-slate-900 border border-slate-800 rounded-full text-slate-300 hover:text-white transition-colors"
+          className="p-2.5 bg-white border border-slate-200 rounded-2xl shadow-sm text-slate-600 hover:text-slate-800 transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="text-xl font-bold text-white flex items-center gap-2">
+        <h1 className="text-xl font-bold text-slate-800 flex items-center gap-2">
           <Trophy className="w-5 h-5 text-yellow-500" />
           Referral Leaderboard
         </h1>
@@ -128,22 +128,22 @@ export default function Leaderboard() {
       ) : (
         <>
           {/* Target Progress Card */}
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 mb-6 shadow-xl relative overflow-hidden">
+          <div className="bg-white border border-slate-200 rounded-3xl p-5 mb-6 shadow-xl relative overflow-hidden">
              <div className="absolute top-0 right-0 p-4 opacity-10">
                <Gift className="w-24 h-24 text-[#038758]" />
              </div>
              
              <div className="relative z-10">
-               <h3 className="text-lg font-bold text-white flex items-center gap-2">
+               <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
                  <Gift className="w-5 h-5 text-[#038758]" />
                  Super Bonus
                </h3>
-               <p className="text-sm text-slate-400 mt-1">
+               <p className="text-sm text-slate-500 mt-1">
                  Invite {TARGET_REFERRALS} friends to unlock a massive <span className="text-amber-400 font-bold">{BONUS_COINS.toLocaleString()} Coin</span> bonus!
                </p>
                
                <div className="mt-5">
-                 <div className="flex justify-between text-xs font-bold text-slate-400 mb-2">
+                 <div className="flex justify-between text-xs font-bold text-slate-500 mb-2">
                    <span>{userReferrals} Referrals</span>
                    <span>{TARGET_REFERRALS} Target</span>
                  </div>
@@ -161,8 +161,8 @@ export default function Leaderboard() {
                      hasClaimed 
                        ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
                        : userReferrals >= TARGET_REFERRALS
-                         ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white shadow-lg shadow-orange-500/25'
-                         : 'bg-slate-800 text-slate-400 cursor-not-allowed'
+                         ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-800 shadow-lg shadow-orange-500/25'
+                         : 'bg-slate-800 text-slate-500 cursor-not-allowed'
                    }`}
                  >
                    {claiming ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
@@ -172,11 +172,11 @@ export default function Leaderboard() {
              </div>
           </div>
 
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-xl">
-             <div className="p-6 text-center border-b border-slate-800 bg-slate-900/50">
+          <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-xl">
+             <div className="p-6 text-center border-b border-slate-200 bg-slate-50 border-b border-slate-100">
                <Trophy className="w-16 h-16 text-yellow-500 mx-auto mb-3" />
-               <h2 className="text-xl font-bold text-white">Top Referrers</h2>
-               <p className="text-sm text-slate-400 mt-1">Invite friends to climb the leaderboard!</p>
+               <h2 className="text-xl font-bold text-slate-800">Top Referrers</h2>
+               <p className="text-sm text-slate-500 mt-1">Invite friends to climb the leaderboard!</p>
              </div>
              
              <div className="divide-y divide-slate-800/50">
@@ -189,7 +189,7 @@ export default function Leaderboard() {
                    <div key={leader.id} className={`p-4 flex items-center gap-4 ${leader.id === telegramId ? 'bg-[#038758]/10' : ''}`}>
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
                         index === 0 ? 'bg-yellow-500/20 text-yellow-500' :
-                        index === 1 ? 'bg-slate-400/20 text-slate-300' :
+                        index === 1 ? 'bg-slate-400/20 text-slate-600' :
                         index === 2 ? 'bg-amber-700/20 text-amber-600' :
                         'bg-slate-800 text-slate-500'
                       }`}>
@@ -197,7 +197,7 @@ export default function Leaderboard() {
                       </div>
                       
                       <div className="flex-1">
-                        <p className="font-bold text-white flex items-center gap-2">
+                        <p className="font-bold text-slate-800 flex items-center gap-2">
                           {leader.id === telegramId ? 'You' : `User ${leader.id.toString().slice(0, 4)}...`}
                         </p>
                       </div>

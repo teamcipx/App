@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { supabase } from '../lib/supabase';
-import { Settings as SettingsIcon, Users, Check, X, Loader2, Save, Send, Ban, MessageSquare, Inbox, Archive } from 'lucide-react';
+import { Settings as SettingsIcon, Users, Check, X, Loader2, Save, Send, Ban, MessageSquare, Inbox, Archive, Trash } from 'lucide-react';
 import WebApp from '@twa-dev/sdk';
 import { toast } from 'sonner';
 
