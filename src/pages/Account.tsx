@@ -46,10 +46,17 @@ export default function Account() {
 
   const referralLink = `https://t.me/${botName}?start=${telegramId}`;
 
+  const shareText = `🎉 xN Coin-এ যোগ দিন এবং ফ্রিতে কয়েন আয় করুন!\n\nএই লিংকে ক্লিক করে এখনই ৫০০ কয়েন বোনাস পান:\n${referralLink}`;
+
   const copyLink = () => {
-    navigator.clipboard.writeText(referralLink);
+    navigator.clipboard.writeText(shareText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const shareTelegram = () => {
+    const tgUrl = `https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent('🎉 xN Coin-এ যোগ দিন এবং ফ্রিতে কয়েন আয় করুন!\n\nএই লিংকে ক্লিক করে এখনই ৫০০ কয়েন বোনাস পান:')}`;
+    window.open(tgUrl, '_blank');
   };
 
   if (loading) {
@@ -62,7 +69,7 @@ export default function Account() {
         <button onClick={() => navigate('/')} className="p-2.5 bg-white border border-slate-200 rounded-2xl shadow-sm text-slate-600 hover:text-slate-800 transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="text-2xl font-bold text-slate-800">Account & Referrals</h1>
+        <h1 className="text-2xl font-bold text-slate-800">অ্যাকাউন্ট ও রেফারেল</h1>
       </div>
 
       <div className="bg-white border border-slate-200 rounded-3xl p-6 mb-6 shadow-xl text-center">
@@ -78,41 +85,49 @@ export default function Account() {
           className="w-full bg-[#038758] hover:bg-[#026b46] text-white py-3 rounded-2xl font-bold flex items-center justify-center gap-2 transition-colors mb-6"
         >
           <Wallet className="w-5 h-5" />
-          Withdraw Funds
+          উত্তোলন করুন
         </button>
 
         <div className="grid grid-cols-2 gap-4 border-t border-slate-200 pt-6">
           <div>
-            <p className="text-slate-500 text-xs font-medium mb-1">Total Referrals</p>
+            <p className="text-slate-500 text-xs font-medium mb-1">সর্বমোট রেফারেল</p>
             <p className="text-2xl font-bold tracking-tight text-slate-800">{referrals}</p>
           </div>
           <div>
-            <p className="text-slate-500 text-xs font-medium mb-1">Reward Per Invite</p>
+            <p className="text-slate-500 text-xs font-medium mb-1">রেফারেল বোনাস</p>
             <p className="text-2xl font-bold tracking-tight text-[#038758]">500 <span className="text-sm">xNC</span></p>
           </div>
         </div>
       </div>
 
       <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl mb-6">
-        <h2 className="text-lg font-bold text-slate-800 mb-2">Invite Friends</h2>
+        <h2 className="text-lg font-bold text-slate-800 mb-2">বন্ধুদের আমন্ত্রণ জানান</h2>
         <p className="text-slate-500 text-sm mb-6">
-          Share your referral link with your friends. You both will get 500 Coins! Plus, you'll earn 10% commission when they withdraw.
+          আপনার বন্ধুদের সাথে লিংক শেয়ার করুন। আপনারা দুজনেই ৫০০ কয়েন পাবেন! তাছাড়া তারা উত্তোলন করলে আপনি ১০% কমিশন পাবেন।
         </p>
 
-        <div className="bg-slate-950 border border-slate-200 rounded-2xl p-4 flex items-center justify-between gap-4">
+        <div className="bg-slate-950 border border-slate-200 rounded-2xl p-4 flex flex-col gap-4">
           <span className="font-mono text-xs text-slate-600 truncate">{referralLink}</span>
-          <button 
-            onClick={copyLink}
-            className={`p-2 rounded-xl transition-colors shrink-0 ${copied ? 'bg-green-500/20 text-green-400' : 'bg-[#038758] text-slate-800 hover:bg-[#038758]'}`}
-          >
-            {copied ? <span className="text-xs font-bold px-2">Copied!</span> : <Copy className="w-4 h-4" />}
-          </button>
+          <div className="flex gap-2">
+            <button 
+              onClick={copyLink}
+              className={`flex-1 p-3 rounded-xl transition-colors font-bold text-sm flex justify-center items-center gap-2 ${copied ? 'bg-green-500/20 text-green-600' : 'bg-slate-100 text-slate-800 hover:bg-slate-200'}`}
+            >
+              {copied ? 'কপি হয়েছে!' : <><Copy className="w-4 h-4" /> লিংক কপি করুন</>}
+            </button>
+            <button 
+              onClick={shareTelegram}
+              className="flex-1 p-3 rounded-xl transition-colors font-bold text-sm flex justify-center items-center gap-2 bg-[#0088cc] text-white hover:bg-[#0077b3]"
+            >
+              টেলিগ্রামে শেয়ার করুন
+            </button>
+          </div>
         </div>
       </div>
 
       {referredUsers.length > 0 && (
         <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl">
-          <h2 className="text-lg font-bold text-slate-800 mb-4">Your Referrals</h2>
+          <h2 className="text-lg font-bold text-slate-800 mb-4">আপনার রেফারেলসমূহ</h2>
           <div className="space-y-3 max-h-64 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
             {referredUsers.map((ref, idx) => (
               <div key={idx} className="bg-slate-950 border border-slate-200 p-3 rounded-xl flex items-center justify-between">

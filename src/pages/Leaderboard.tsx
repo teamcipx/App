@@ -119,7 +119,7 @@ export default function Leaderboard() {
         </button>
         <h1 className="text-xl font-bold text-slate-800 flex items-center gap-2">
           <Trophy className="w-5 h-5 text-yellow-500" />
-          Referral Leaderboard
+          রেফারেল লিডারবোর্ড
         </h1>
       </div>
 
@@ -136,16 +136,16 @@ export default function Leaderboard() {
              <div className="relative z-10">
                <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
                  <Gift className="w-5 h-5 text-[#038758]" />
-                 Super Bonus
+                 সুপার বোনাস
                </h3>
                <p className="text-sm text-slate-500 mt-1">
-                 Invite {TARGET_REFERRALS} friends to unlock a massive <span className="text-amber-400 font-bold">{BONUS_COINS.toLocaleString()} Coin</span> bonus!
+                 আকর্ষণীয় <span className="text-amber-500 font-bold">{BONUS_COINS.toLocaleString()} কয়েন</span> বোনাস পেতে {TARGET_REFERRALS} জন বন্ধুকে আমন্ত্রণ জানান!
                </p>
                
                <div className="mt-5">
                  <div className="flex justify-between text-xs font-bold text-slate-500 mb-2">
-                   <span>{userReferrals} Referrals</span>
-                   <span>{TARGET_REFERRALS} Target</span>
+                   <span>{userReferrals} টি রেফারেল</span>
+                   <span>লক্ষ্য {TARGET_REFERRALS} টি</span>
                  </div>
                  <div className="h-3 bg-slate-800 rounded-full overflow-hidden mb-5">
                    <div 
@@ -166,23 +166,23 @@ export default function Leaderboard() {
                    }`}
                  >
                    {claiming ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                   {hasClaimed ? 'Bonus Claimed!' : userReferrals >= TARGET_REFERRALS ? 'CLAIM BONUS NOW' : `Need ${TARGET_REFERRALS - userReferrals} More Invites`}
+                   {hasClaimed ? 'বোনাস সংগ্রহ করা হয়েছে!' : userReferrals >= TARGET_REFERRALS ? 'এখনই বোনাস সংগ্রহ করুন' : `আরও ${TARGET_REFERRALS - userReferrals} টি রেফারেল প্রয়োজন`}
                  </button>
                </div>
              </div>
           </div>
 
           <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-xl">
-             <div className="p-6 text-center border-b border-slate-200 bg-slate-50 border-b border-slate-100">
+             <div className="p-6 text-center border-b border-slate-200 bg-slate-50">
                <Trophy className="w-16 h-16 text-yellow-500 mx-auto mb-3" />
-               <h2 className="text-xl font-bold text-slate-800">Top Referrers</h2>
-               <p className="text-sm text-slate-500 mt-1">Invite friends to climb the leaderboard!</p>
+               <h2 className="text-xl font-bold text-slate-800">শীর্ষ রেফারার</h2>
+               <p className="text-sm text-slate-500 mt-1">লিডারবোর্ডে উপরে উঠতে বন্ধুদের আমন্ত্রণ জানান!</p>
              </div>
              
              <div className="divide-y divide-slate-800/50">
                {leaders.length === 0 ? (
                  <div className="p-8 text-center text-slate-500">
-                   No referrals yet. Be the first!
+                   এখনো কোনো রেফারেল নেই। আপনিই প্রথম হোন!
                  </div>
                ) : (
                  leaders.map((leader, index) => (
@@ -198,7 +198,7 @@ export default function Leaderboard() {
                       
                       <div className="flex-1">
                         <p className="font-bold text-slate-800 flex items-center gap-2">
-                          {leader.id === telegramId ? 'You' : `User ${leader.id.toString().slice(0, 4)}...`}
+                          {leader.id === telegramId ? 'আপনি' : `User ${leader.id.toString().slice(0, 4)}...`}
                         </p>
                       </div>
                       

@@ -88,7 +88,7 @@ if (token) {
     bot?.sendMessage(chatId, welcomeMessage, {
       reply_markup: {
         inline_keyboard: [
-          [{ text: '📱 Open App & Earn', web_app: { url: finalUrl } }]
+          [{ text: '📱 অ্যাপটি খুলুন এবং আয় করুন', web_app: { url: finalUrl } }]
         ]
       }
     });

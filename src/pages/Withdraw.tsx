@@ -52,20 +52,20 @@ export default function Withdraw() {
     const amt = parseInt(amount);
     
     if (!method || !details || !amt) {
-      toast.error('Please fill in all fields');
-      setError('Please fill in all fields');
+      toast.error('অনুগ্রহ করে সব তথ্য দিন');
+      setError('অনুগ্রহ করে সব তথ্য দিন');
       return;
     }
     
     if (amt < (settings?.min_withdraw || 0)) {
-      toast.error(`Minimum withdrawal is ${settings?.min_withdraw} coins`);
-      setError(`Minimum withdrawal is ${settings.min_withdraw} coins`);
+      toast.error(`সর্বনিন্ম উত্তোলন ${settings?.min_withdraw} coins`);
+      setError(`সর্বনিন্ম উত্তোলন ${settings.min_withdraw} coins`);
       return;
     }
     
     if (amt > user.balance) {
-      toast.error('Insufficient balance');
-      setError('Insufficient balance');
+      toast.error('পর্যাপ্ত ব্যালেন্স নেই');
+      setError('পর্যাপ্ত ব্যালেন্স নেই');
       return;
     }
 
@@ -99,11 +99,11 @@ export default function Withdraw() {
         }
       }
 
-      toast.success('Withdraw request submitted!');
+      toast.success('উত্তোলনের অনুরোধ গ্রহণ করা হয়েছে!');
       navigate('/');
     } catch (e) {
-      toast.error('Failed to submit withdrawal request.');
-      setError('Failed to submit withdrawal request.');
+      toast.error('উত্তোলনের অনুরোধ পাঠাতে ব্যর্থ হয়েছে।');
+      setError('উত্তোলনের অনুরোধ পাঠাতে ব্যর্থ হয়েছে।');
     }
     setSubmitting(false);
   };
@@ -120,11 +120,11 @@ export default function Withdraw() {
         <button onClick={() => navigate(-1)} className="p-2.5 bg-white border border-slate-200 rounded-2xl shadow-sm text-slate-600 hover:text-slate-800 transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="text-2xl font-bold text-slate-800">Withdraw Funds</h1>
+        <h1 className="text-2xl font-bold text-slate-800">ফান্ড উত্তোলন</h1>
       </div>
 
       <div className="bg-[#038758] rounded-[24px] p-6 text-white shadow-md relative overflow-hidden mb-6">
-        <p className="text-emerald-100/90 text-[15px] font-medium mb-1">Available Balance</p>
+        <p className="text-emerald-100/90 text-[15px] font-medium mb-1">মোট ব্যালেন্স</p>
         <div className="flex items-center gap-1">
           <span className="text-5xl font-bold tracking-tight">{(user?.balance || 0).toFixed(2)}</span>
           <span className="text-2xl font-bold mt-3">xNC</span>
@@ -134,7 +134,7 @@ export default function Withdraw() {
       <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl mb-6">
         <form onSubmit={handleSubmit}>
           <div className="mb-6">
-            <label className="block text-sm font-medium text-slate-500 mb-2">Select Method</label>
+            <label className="block text-sm font-medium text-slate-500 mb-2">পেমেন্ট মেথড নির্বাচন করুন</label>
             <div className="grid grid-cols-2 gap-3">
               {METHODS.map(m => (
                 <button
@@ -154,13 +154,13 @@ export default function Withdraw() {
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-slate-500 mb-2">Withdraw Amount (Coins)</label>
+            <label className="block text-sm font-medium text-slate-500 mb-2">উত্তোলনের পরিমাণ (কয়েন)</label>
             <div className="relative">
               <input
                 type="number"
                 value={amount}
                 onChange={e => setAmount(e.target.value)}
-                placeholder={`Min ${settings?.min_withdraw || 0}`}
+                placeholder={`সর্বনিন্ম ${settings?.min_withdraw || 0}`}
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#038758] font-mono"
               />
               <button 
@@ -173,19 +173,19 @@ export default function Withdraw() {
             </div>
             {amount && !isNaN(parseInt(amount)) && (
               <p className="text-xs text-[#038758] mt-2 font-mono flex items-center gap-1">
-                You will receive ~ {calculatedValue.toFixed(2)} USD
+                আপনি পাবেন ~ {calculatedValue.toFixed(2)} USD
               </p>
             )}
             <p className="text-xs text-slate-500 mt-2 font-medium">1 USD = 121 ৳</p>
           </div>
 
           <div className="mb-6">
-            <label className="block text-sm font-medium text-slate-500 mb-2">Account Details</label>
+            <label className="block text-sm font-medium text-slate-500 mb-2">অ্যাকাউন্ট নম্বর / বিস্তারিত</label>
             <input
               type="text"
               value={details}
               onChange={e => setDetails(e.target.value)}
-              placeholder={method === 'binance' ? "Binance Pay ID / Email" : "Phone Number"}
+              placeholder={method === 'binance' ? "Binance Pay ID / Email" : "ফোন নম্বর"}
               className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#038758]"
             />
           </div>
@@ -203,7 +203,7 @@ export default function Withdraw() {
           >
             {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : (
               <>
-                Confirm Withdraw <ArrowRight className="w-5 h-5" />
+                উত্তোলন নিশ্চিত করুন <ArrowRight className="w-5 h-5" />
               </>
             )}
           </button>
