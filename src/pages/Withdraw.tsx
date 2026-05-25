@@ -16,6 +16,7 @@ export default function Withdraw() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [settings, setSettings] = useState<any>(null);
+  const [referrals, setReferrals] = useState(0);
 
   const [method, setMethod] = useState('');
   const [details, setDetails] = useState('');
@@ -38,6 +39,9 @@ export default function Withdraw() {
       
       const { data: dbSettings } = await supabase.from('settings').select('*').single();
       if (dbSettings) setSettings(dbSettings);
+
+      const { data: refs } = await supabase.from('users').select('telegram_id').eq('referred_by', telegramId);
+      if (refs) setReferrals(refs.length);
     } catch (err) {
       console.error(err);
     } finally {
@@ -49,6 +53,12 @@ export default function Withdraw() {
     e.preventDefault();
     setError('');
     
+    if (referrals < 5) {
+      toast.error('উত্তোলন করতে হলে সর্বনিম্ন ৫টি রেফারেল থাকতে হবে।');
+      setError('উত্তোলন করতে হলে সর্বনিম্ন ৫টি রেফারেল থাকতে হবে।');
+      return;
+    }
+
     const amt = parseInt(amount);
     
     if (!method || !details || !amt) {
@@ -131,6 +141,16 @@ export default function Withdraw() {
         </div>
       </div>
 
+      {referrals < 5 && (
+        <div className="bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-2xl mb-6 text-sm flex items-start gap-3">
+          <div className="text-xl">⚠️</div>
+          <div>
+            উত্তোলন করার জন্য আপনার কমপক্ষে <strong>৫টি রেফারেল</strong> থাকতে হবে।<br/>
+            <span className="text-amber-700 mt-1 inline-block">বর্তমানে আছে: {referrals}টি</span>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl mb-6">
         <form onSubmit={handleSubmit}>
           <div className="mb-6">
@@ -198,7 +218,7 @@ export default function Withdraw() {
 
           <button
             type="submit"
-            disabled={submitting}
+            disabled={submitting || referrals < 5}
             className="w-full bg-[#038758] hover:bg-[#026b46] text-white disabled:opacity-50 disabled:cursor-not-allowed py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-md"
           >
             {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : (
