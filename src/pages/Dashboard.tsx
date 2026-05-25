@@ -335,14 +335,6 @@ export default function Dashboard() {
           onClose={() => setShowNotice(false)} 
           text={settings?.notice_text || ''} 
         />
-        
-        <WithdrawDialog 
-          open={showWithdraw} 
-          onClose={() => setShowWithdraw(false)} 
-          user={user}
-          settings={settings}
-          onSuccess={fetchData}
-        />
 
         <PromoDialog
           isOpen={showPromo}
@@ -360,9 +352,18 @@ export default function Dashboard() {
         {!user?.is_banned && (
           <div className="bg-[#038758] rounded-[24px] p-6 text-white shadow-md relative overflow-hidden">
             <p className="text-emerald-100/90 text-[15px] font-medium mb-1">মোট ব্যালেন্স</p>
-            <div className="flex items-center gap-1">
-              <span className="text-5xl font-bold tracking-tight">{(user?.balance || 0).toFixed(2)}</span>
-              <span className="text-2xl font-bold mt-3">xNC</span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1">
+                <span className="text-5xl font-bold tracking-tight">{(user?.balance || 0).toFixed(2)}</span>
+                <span className="text-2xl font-bold mt-3">xNC</span>
+              </div>
+              <button
+                onClick={() => navigate('/withdraw')}
+                className="bg-white/20 hover:bg-white/30 text-white px-5 py-2.5 rounded-full font-bold text-sm backdrop-blur-sm transition-colors flex items-center gap-2"
+              >
+                <Wallet className="w-4 h-4" />
+                Withdraw
+              </button>
             </div>
           </div>
         )}

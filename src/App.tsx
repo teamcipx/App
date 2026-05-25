@@ -4,6 +4,7 @@ import Admin from './pages/Admin';
 import Account from './pages/Account';
 import Tasks from './pages/Tasks';
 import History from './pages/History';
+import Withdraw from './pages/Withdraw';
 import { useEffect } from 'react';
 import WebApp from '@twa-dev/sdk';
 import { Toaster } from 'sonner';
@@ -41,6 +42,7 @@ export default function App() {
           <Route path="/admin" element={<Admin />} />
           <Route path="/account" element={<Account />} />
           <Route path="/tasks" element={<Tasks />} />
+          <Route path="/withdraw" element={<Withdraw />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/spin" element={<Spin />} />
           <Route path="/scratch" element={<Scratch />} />

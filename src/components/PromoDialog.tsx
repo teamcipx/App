@@ -53,7 +53,7 @@ export default function PromoDialog({
         .select('id')
         .eq('telegram_id', telegramId)
         .eq('promo_id', promoData.id)
-        .single();
+        .maybeSingle();
 
       if (userPromoData) {
         toast.error('আপনি ইতিমধ্যে এই প্রোমো কোডটি ব্যবহার করেছেন!');

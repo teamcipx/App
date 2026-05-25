@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import WebApp from '@twa-dev/sdk';
-import { Users, Copy, ArrowLeft, Loader2, User } from 'lucide-react';
+import { Users, Copy, ArrowLeft, Loader2, User, Wallet } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function Account() {
@@ -72,6 +72,14 @@ export default function Account() {
         <h2 className="text-2xl font-bold text-slate-800 mb-1">{userName}</h2>
         <p className="text-slate-500 text-sm mb-1">Telegram ID</p>
         <p className="text-lg font-mono text-[#038758] mb-6">{telegramId}</p>
+
+        <button
+          onClick={() => navigate('/withdraw')}
+          className="w-full bg-[#038758] hover:bg-[#026b46] text-white py-3 rounded-2xl font-bold flex items-center justify-center gap-2 transition-colors mb-6"
+        >
+          <Wallet className="w-5 h-5" />
+          Withdraw Funds
+        </button>
 
         <div className="grid grid-cols-2 gap-4 border-t border-slate-200 pt-6">
           <div>

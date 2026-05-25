@@ -1,34 +1,49 @@
-import React, { useState } from 'react';
-import { X, Loader2, ArrowRight } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import WebApp from '@twa-dev/sdk';
+import { ArrowLeft, Loader2, Wallet, ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 const METHODS = [
-  { id: 'bkash', name: 'bKash' },
   { id: 'nagad', name: 'Nagad' },
   { id: 'rocket', name: 'Rocket' },
+  { id: 'bkash', name: 'bKash' },
   { id: 'binance', name: 'Binance' },
 ];
 
-export default function WithdrawDialog({ 
-  open, 
-  onClose, 
-  user,
-  settings,
-  onSuccess
-}: { 
-  open: boolean, 
-  onClose: () => void, 
-  user: any,
-  settings: any,
-  onSuccess: () => void
-}) {
+export default function Withdraw() {
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
+  const [settings, setSettings] = useState<any>(null);
+
   const [method, setMethod] = useState('');
   const [details, setDetails] = useState('');
   const [amount, setAmount] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
-  if (!open) return null;
+  const telegramId = WebApp?.initDataUnsafe?.user?.id || 7360769822;
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const { data: dbUser } = await supabase.from('users').select('*').eq('telegram_id', telegramId).single();
+      if (dbUser) setUser(dbUser);
+      
+      const { data: dbSettings } = await supabase.from('settings').select('*').single();
+      if (dbSettings) setSettings(dbSettings);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,21 +52,24 @@ export default function WithdrawDialog({
     const amt = parseInt(amount);
     
     if (!method || !details || !amt) {
+      toast.error('Please fill in all fields');
       setError('Please fill in all fields');
       return;
     }
     
-    if (amt < settings.min_withdraw) {
+    if (amt < (settings?.min_withdraw || 0)) {
+      toast.error(`Minimum withdrawal is ${settings?.min_withdraw} coins`);
       setError(`Minimum withdrawal is ${settings.min_withdraw} coins`);
       return;
     }
     
     if (amt > user.balance) {
+      toast.error('Insufficient balance');
       setError('Insufficient balance');
       return;
     }
 
-    setLoading(true);
+    setSubmitting(true);
     try {
       // Create request
       await supabase.from('withdrawals').insert([{
@@ -76,32 +94,45 @@ export default function WithdrawDialog({
               await supabase.from('users').update({ balance: referrer.balance + commission }).eq('telegram_id', user.referred_by);
             }
           } catch(e) {
-            console.error('Commission error', e);
+             console.error('Commission error', e);
           }
         }
       }
 
-      onSuccess();
-      onClose();
+      toast.success('Withdraw request submitted!');
+      navigate('/');
     } catch (e) {
+      toast.error('Failed to submit withdrawal request.');
       setError('Failed to submit withdrawal request.');
     }
-    setLoading(false);
+    setSubmitting(false);
   };
 
-  const calculatedValue = parseInt(amount) * (settings?.coin_rate || 0);
+  if (loading) {
+    return <div className="min-h-screen bg-slate-50 flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-[#038758]" /></div>;
+  }
+
+  const calculatedValue = parseInt(amount || '0') * (settings?.coin_rate || 0);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-slate-50/80 backdrop-blur-sm">
-      <div className="bg-white border-t sm:border border-slate-200 rounded-t-3xl sm:rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in slide-in-from-bottom-5 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200">
-        <div className="flex justify-between items-center p-6 border-b border-slate-200">
-          <h2 className="text-xl font-bold text-slate-800">Withdraw Funds</h2>
-          <button onClick={onClose} className="text-slate-500 hover:text-slate-800 bg-slate-800 p-2 rounded-full">
-            <X className="w-5 h-5" />
-          </button>
+    <div className="max-w-md mx-auto pt-6 px-4 bg-slate-50 min-h-screen pb-32 pb-20">
+      <div className="flex items-center gap-4 mb-8">
+        <button onClick={() => navigate(-1)} className="p-2.5 bg-white border border-slate-200 rounded-2xl shadow-sm text-slate-600 hover:text-slate-800 transition-colors">
+          <ArrowLeft className="w-5 h-5" />
+        </button>
+        <h1 className="text-2xl font-bold text-slate-800">Withdraw Funds</h1>
+      </div>
+
+      <div className="bg-[#038758] rounded-[24px] p-6 text-white shadow-md relative overflow-hidden mb-6">
+        <p className="text-emerald-100/90 text-[15px] font-medium mb-1">Available Balance</p>
+        <div className="flex items-center gap-1">
+          <span className="text-5xl font-bold tracking-tight">{(user?.balance || 0).toFixed(2)}</span>
+          <span className="text-2xl font-bold mt-3">xNC</span>
         </div>
-        
-        <form onSubmit={handleSubmit} className="p-6">
+      </div>
+
+      <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl mb-6">
+        <form onSubmit={handleSubmit}>
           <div className="mb-6">
             <label className="block text-sm font-medium text-slate-500 mb-2">Select Method</label>
             <div className="grid grid-cols-2 gap-3">
@@ -112,7 +143,7 @@ export default function WithdrawDialog({
                   onClick={() => setMethod(m.id)}
                   className={`py-3 px-4 rounded-xl font-medium transition-colors border ${
                     method === m.id 
-                    ? 'bg-[#038758] border-[#038758] text-slate-800 shadow-[0_0_15px_rgba(79,70,229,0.3)]' 
+                    ? 'bg-[#038758]/10 border-[#038758] text-[#038758] shadow-sm' 
                     : 'bg-slate-50 border-slate-200 text-slate-500 hover:border-slate-300'
                   }`}
                 >
@@ -134,7 +165,7 @@ export default function WithdrawDialog({
               />
               <button 
                 type="button" 
-                onClick={() => setAmount(user.balance.toString())}
+                onClick={() => setAmount(user?.balance?.toString() || '0')}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-xs bg-[#038758]/10 text-[#038758] px-2 py-1 rounded font-medium hover:bg-[#038758]/20"
               >
                 MAX
@@ -167,10 +198,10 @@ export default function WithdrawDialog({
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={submitting}
             className="w-full bg-[#038758] hover:bg-[#026b46] text-white disabled:opacity-50 disabled:cursor-not-allowed py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-md"
           >
-            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
+            {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : (
               <>
                 Confirm Withdraw <ArrowRight className="w-5 h-5" />
               </>

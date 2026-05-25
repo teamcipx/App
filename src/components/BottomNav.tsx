@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, ListTodo, History, Trophy, User } from 'lucide-react';
+import { Home, ListTodo, History, Trophy, User, Wallet } from 'lucide-react';
 
 export default function BottomNav() {
   const location = useLocation();
@@ -13,6 +13,7 @@ export default function BottomNav() {
   const navItems = [
     { path: '/', label: 'Home', icon: Home },
     { path: '/tasks', label: 'Tasks', icon: ListTodo },
+    { path: '/withdraw', label: 'Withdraw', icon: Wallet },
     { path: '/leaderboard', label: 'Rank', icon: Trophy },
     { path: '/history', label: 'History', icon: History },
     { path: '/account', label: 'Profile', icon: User },
