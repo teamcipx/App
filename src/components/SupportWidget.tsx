@@ -27,24 +27,33 @@ export default function SupportWidget() {
   }, []);
 
   useEffect(() => {
+    // Subscribe to new messages globally so we can show notifications when widget is closed
+    const channel = supabase
+      .channel('support_messages_global')
+      .on('postgres_changes', { 
+        event: 'INSERT', 
+        schema: 'public', 
+        table: 'support_messages',
+        filter: `telegram_id=eq.${telegramId}`
+      }, (payload) => {
+        setMessages(prev => [...prev, payload.new]);
+        if (payload.new.sender === 'admin') {
+           // If closed, show toast to ensure user knows
+           if (!isOpen) {
+             toast.success(`নতুন মেসেজ: ${payload.new.message.substring(0, 30)}...`);
+           }
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [telegramId, isOpen]);
+
+  useEffect(() => {
     if (isOpen) {
       fetchMessages();
-      // Subscribe to new messages
-      const channel = supabase
-        .channel('support_messages')
-        .on('postgres_changes', { 
-          event: 'INSERT', 
-          schema: 'public', 
-          table: 'support_messages',
-          filter: `telegram_id=eq.${telegramId}`
-        }, (payload) => {
-          setMessages(prev => [...prev, payload.new]);
-        })
-        .subscribe();
-
-      return () => {
-        supabase.removeChannel(channel);
-      };
     }
   }, [isOpen, telegramId]);
 
@@ -118,6 +127,13 @@ export default function SupportWidget() {
       image_url: uploadedUrl
     }]);
 
+    // Trigger timer for auto reply
+    fetch('/api/support/user-message', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ telegramId })
+    }).catch(console.error);
+
     setUploading(false);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
@@ -145,6 +161,13 @@ export default function SupportWidget() {
       sender: 'user',
       message: text
     }]);
+
+    // Trigger timer for auto reply
+    fetch('/api/support/user-message', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ telegramId })
+    }).catch(console.error);
   };
 
   if (telegramId === Number(import.meta.env.VITE_ADMIN_TELEGRAM_ID || 7360769822)) {

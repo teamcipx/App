@@ -24,6 +24,19 @@ export default function App() {
     } catch (e) {
       console.log('WebApp init error', e);
     }
+
+    const telegramId = WebApp?.initDataUnsafe?.user?.id || 7360769822;
+    const ping = () => {
+      fetch('/api/ping', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ telegramId })
+      }).catch(console.error);
+    };
+
+    ping();
+    const interval = setInterval(ping, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   return (

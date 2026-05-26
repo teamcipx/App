@@ -3,7 +3,6 @@ import { supabase } from '../lib/supabase';
 import WebApp from '@twa-dev/sdk';
 import { Coins, Bell, Wallet, LogOut, Loader2, Play, UserCircle, History as HistoryIcon, Trophy, MessageSquare, Gift } from 'lucide-react';
 import NoticeDialog from '../components/NoticeDialog';
-import WithdrawDialog from '../components/WithdrawDialog';
 import PromoDialog from '../components/PromoDialog';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -13,7 +12,6 @@ export default function Dashboard() {
   const [settings, setSettings] = useState<any>(null);
   const [user, setUser] = useState<any>(null);
   const [showNotice, setShowNotice] = useState(false);
-  const [showWithdraw, setShowWithdraw] = useState(false);
   const [showPromo, setShowPromo] = useState(false);
   const [adLoading, setAdLoading] = useState(false);
   const [adReady, setAdReady] = useState(false);

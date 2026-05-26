@@ -98,11 +98,86 @@ if (token) {
 }
 
 
+const activeUsers = new Map<number, number>();
+const pendingUserMessages = new Map<number, NodeJS.Timeout>();
+
 async function startServer() {
   
   // API route for health check
   app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', botActive: !!bot });
+  });
+
+  app.post('/api/ping', (req, res) => {
+    const { telegramId } = req.body;
+    if (telegramId) {
+      activeUsers.set(telegramId, Date.now());
+    }
+    res.json({ success: true });
+  });
+
+  app.post('/api/support/user-message', (req, res) => {
+    const { telegramId } = req.body;
+    if (!telegramId) return res.status(400).json({ error: 'Missing telegramId' });
+    
+    if (pendingUserMessages.has(telegramId)) {
+      clearTimeout(pendingUserMessages.get(telegramId)!);
+    }
+    
+    const timeoutId = setTimeout(async () => {
+      pendingUserMessages.delete(telegramId);
+      if (supabase) {
+        // Auto-reply after 2 mins
+        await supabase.from('support_messages').insert([{
+          telegram_id: telegramId,
+          sender: 'admin',
+          message: 'আমাদের অ্যাডমিন এই মুহূর্তে ব্যস্ত আছেন। দয়া করে কিছুক্ষণ অপেক্ষা করুন, খুব শীঘ্রই আপনার মেসেজের রিপ্লাই দেওয়া হবে।'
+        }]);
+        
+        // Check if user is in app, if not send telegram msg
+        const lastActive = activeUsers.get(telegramId);
+        const isInApp = lastActive && (Date.now() - lastActive < 60000);
+        
+        if (!isInApp && bot) {
+          try {
+            await bot.sendMessage(telegramId, 'আমাদের অ্যাডমিন এই মুহূর্তে ব্যস্ত আছেন। দয়া করে কিছুক্ষণ অপেক্ষা করুন, খুব শীঘ্রই আপনার মেসেজের রিপ্লাই দেওয়া হবে।');
+          } catch(e) {
+            console.error('Failed to notify auto-reply', e);
+          }
+        }
+      }
+    }, 2 * 60 * 1000);
+    
+    pendingUserMessages.set(telegramId, timeoutId);
+    res.json({ success: true });
+  });
+
+  app.post('/api/support/admin-reply', async (req, res) => {
+    const { telegramId, message, adminId } = req.body;
+    
+    const envAdminId = process.env.ADMIN_TELEGRAM_ID || process.env.VITE_ADMIN_TELEGRAM_ID;
+    if (!adminId || !envAdminId || adminId.toString() !== envAdminId.toString()) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    if (pendingUserMessages.has(telegramId)) {
+      clearTimeout(pendingUserMessages.get(telegramId)!);
+      pendingUserMessages.delete(telegramId);
+    }
+
+    const lastActive = activeUsers.get(telegramId);
+    const isInApp = lastActive && (Date.now() - lastActive < 60000);
+
+    if (!isInApp && bot) {
+      const text = `অ্যাডমিন আপনার মেসেজের জবাব দিয়েছেন,\n\nReply : ${message}`;
+      try {
+        await bot.sendMessage(telegramId, text);
+      } catch (e) {
+        console.error('Failed to notify user via telegram:', e);
+      }
+    }
+    
+    res.json({ success: true, isInApp });
   });
 
   // API route for broadcasting messages

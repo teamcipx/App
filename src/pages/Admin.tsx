@@ -172,6 +172,17 @@ export default function Admin() {
     }]);
 
     await supabase.from('support_chats').update({ updated_at: new Date().toISOString() }).eq('telegram_id', selectedChat.telegram_id);
+
+    // Trigger admin reply endpoint
+    fetch('/api/support/admin-reply', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        telegramId: selectedChat.telegram_id, 
+        message: text,
+        adminId: telegramId
+      })
+    }).catch(console.error);
   };
 
   const handleChatAction = async (chatId: number, status: string) => {
