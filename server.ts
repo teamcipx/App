@@ -111,13 +111,13 @@ async function startServer() {
   app.post('/api/ping', (req, res) => {
     const { telegramId } = req.body;
     if (telegramId) {
-      activeUsers.set(telegramId, Date.now());
+      activeUsers.set(Number(telegramId), Date.now());
     }
     res.json({ success: true });
   });
 
   app.post('/api/support/user-message', (req, res) => {
-    const { telegramId } = req.body;
+    const telegramId = Number(req.body.telegramId);
     if (!telegramId) return res.status(400).json({ error: 'Missing telegramId' });
     
     if (pendingUserMessages.has(telegramId)) {
@@ -136,7 +136,7 @@ async function startServer() {
         
         // Check if user is in app, if not send telegram msg
         const lastActive = activeUsers.get(telegramId);
-        const isInApp = lastActive && (Date.now() - lastActive < 60000);
+        const isInApp = lastActive && (Date.now() - lastActive < 35000);
         
         if (!isInApp && bot) {
           try {
@@ -153,7 +153,8 @@ async function startServer() {
   });
 
   app.post('/api/support/admin-reply', async (req, res) => {
-    const { telegramId, message, adminId } = req.body;
+    const telegramId = Number(req.body.telegramId);
+    const { message, adminId } = req.body;
     
     const envAdminId = process.env.ADMIN_TELEGRAM_ID || process.env.VITE_ADMIN_TELEGRAM_ID;
     if (!adminId || !envAdminId || adminId.toString() !== envAdminId.toString()) {
@@ -166,14 +167,22 @@ async function startServer() {
     }
 
     const lastActive = activeUsers.get(telegramId);
-    const isInApp = lastActive && (Date.now() - lastActive < 60000);
+    
+    // Check if the ping was seen in the last 35 seconds (since ping is every 30s)
+    let isInApp = lastActive && (Date.now() - lastActive < 35000);
+
+    // If the admin is replying to themselves, technically they are in the admin dashboard.
+    // But they probably expect a telegram notification to see if it works.
+    if (adminId.toString() === telegramId.toString()) {
+      isInApp = false; // Force it to send telegram message for testing
+    }
 
     if (!isInApp && bot) {
       const text = `অ্যাডমিন আপনার মেসেজের জবাব দিয়েছেন,\n\nReply : ${message}`;
       try {
         await bot.sendMessage(telegramId, text);
       } catch (e) {
-        console.error('Failed to notify user via telegram:', e);
+        console.error('[admin-reply] Failed to notify user via telegram:', e);
       }
     }
     
