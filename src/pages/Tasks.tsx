@@ -4,6 +4,7 @@ import WebApp from '@twa-dev/sdk';
 import { CheckCircle, Clock, ExternalLink, ArrowLeft, Loader2, ListTodo, Upload } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import confetti from 'canvas-confetti';
 
 export default function Tasks() {
   const [loading, setLoading] = useState(true);
@@ -225,6 +226,11 @@ export default function Tasks() {
       const newBalance = userBalance + task.reward;
       await supabase.from('users').update({ balance: newBalance }).eq('telegram_id', telegramId);
       
+      confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
       toast.success(`টাস্ক সম্পন্ন হয়েছে! আপনি ${task.reward} পয়েন্ট পেয়েছেন।`);
       fetchTasks();
     } catch (err) {

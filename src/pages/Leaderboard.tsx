@@ -4,6 +4,7 @@ import { ArrowLeft, Trophy, Users, Loader2, Gift } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import WebApp from '@twa-dev/sdk';
 import { toast } from 'sonner';
+import confetti from 'canvas-confetti';
 
 export default function Leaderboard() {
   const [loading, setLoading] = useState(true);
@@ -97,6 +98,11 @@ export default function Leaderboard() {
        }).eq('telegram_id', telegramId);
        
        setHasClaimed(true);
+       confetti({
+         particleCount: 150,
+         spread: 70,
+         origin: { y: 0.6 }
+       });
        toast.success(`Congratulations! You claimed ${BONUS_COINS} coins!`);
     } catch(err) {
        console.error(err);

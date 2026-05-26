@@ -6,6 +6,7 @@ import NoticeDialog from '../components/NoticeDialog';
 import PromoDialog from '../components/PromoDialog';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import confetti from 'canvas-confetti';
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);
@@ -220,6 +221,11 @@ export default function Dashboard() {
         setUser({ ...user, balance: newBalance, ads_watched_today: newWatched, customState: stateToSave });
 
         setCooldown(20); // 20 seconds cooldown
+        confetti({
+          particleCount: 150,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
         toast.success(`You earned ${settings.coins_per_ad} coins!`);
       } catch (e) {
         console.error("Error updating reward:", e);

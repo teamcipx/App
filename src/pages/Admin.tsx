@@ -32,6 +32,9 @@ export default function Admin() {
   const [newPromoCode, setNewPromoCode] = useState('');
   const [newPromoReward, setNewPromoReward] = useState('');
   const [newPromoMaxUses, setNewPromoMaxUses] = useState('');
+  
+  const [totalSystemUsers, setTotalSystemUsers] = useState<number>(0);
+  const [totalAdsWatched, setTotalAdsWatched] = useState<number>(0);
 
   useEffect(() => {
     if (telegramId !== adminId) {
@@ -63,6 +66,15 @@ export default function Admin() {
       const { data: u, error: uErr } = await supabase.from('users').select('*').order('created_at', { ascending: false }).limit(100);
       if (uErr) console.error('Error fetching users:', uErr);
       if (u) setUsers(u);
+
+      const { count: uCount } = await supabase.from('users').select('*', { count: 'exact', head: true });
+      if (uCount !== null) setTotalSystemUsers(uCount);
+
+      // We'll fetch all to sum. Supabase has a default 1000 limit, but it's fine for MVP
+      const { data: allAds } = await supabase.from('users').select('ads_watched_today').limit(10000);
+      if (allAds) {
+         setTotalAdsWatched(allAds.reduce((sum, user) => sum + (user.ads_watched_today || 0), 0));
+      }
 
       // Fetch tasks
       const taskRes = await supabase.from('tasks').select('*').order('created_at', { ascending: false });
@@ -330,7 +342,7 @@ export default function Admin() {
         <button onClick={() => setActiveTab('tasks')} className={`px-4 py-2 rounded-xl whitespace-nowrap text-sm font-medium ${activeTab === 'tasks' ? 'bg-[#038758] text-white' : 'bg-white text-slate-500 border border-slate-200'}`}>Tasks</button>
         <button onClick={() => setActiveTab('promos')} className={`px-4 py-2 rounded-xl whitespace-nowrap text-sm font-medium ${activeTab === 'promos' ? 'bg-[#038758] text-white' : 'bg-white text-slate-500 border border-slate-200'}`}>Promo Codes</button>
         <button onClick={() => setActiveTab('withdraw')} className={`px-4 py-2 rounded-xl whitespace-nowrap text-sm font-medium ${activeTab === 'withdraw' ? 'bg-[#038758] text-white' : 'bg-white text-slate-500 border border-slate-200'}`}>Withdrawals</button>
-        <button onClick={() => setActiveTab('users')} className={`px-4 py-2 rounded-xl whitespace-nowrap text-sm font-medium ${activeTab === 'users' ? 'bg-[#038758] text-white' : 'bg-white text-slate-500 border border-slate-200'}`}>Users ({users.length}+)</button>
+        <button onClick={() => setActiveTab('users')} className={`px-4 py-2 rounded-xl whitespace-nowrap text-sm font-medium ${activeTab === 'users' ? 'bg-[#038758] text-white' : 'bg-white text-slate-500 border border-slate-200'}`}>Users ({totalSystemUsers > 0 ? totalSystemUsers : users.length})</button>
         <button onClick={() => setActiveTab('broadcast')} className={`px-4 py-2 rounded-xl whitespace-nowrap text-sm font-medium ${activeTab === 'broadcast' ? 'bg-[#038758] text-white' : 'bg-white text-slate-500 border border-slate-200'}`}>Broadcast</button>
       </div>
 
@@ -436,7 +448,12 @@ export default function Admin() {
 
       {activeTab === 'settings' && (
         <div className="bg-slate-50 border border-slate-200 rounded-3xl p-6 shadow-xl animate-in fade-in zoom-in-95 duration-200">
-          <h2 className="text-lg font-bold text-slate-800 mb-6">App Settings</h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-bold text-slate-800">App Settings</h2>
+            <div className="text-sm font-medium bg-[#038758]/10 text-[#038758] px-3 py-1.5 rounded-lg border border-[#038758]/20">
+              Total Ads Watched (Today): {totalAdsWatched}
+            </div>
+          </div>
           
           <div className="space-y-4">
             <div>
@@ -672,7 +689,7 @@ export default function Admin() {
 
       {activeTab === 'users' && (
         <div className="bg-slate-50 border border-slate-200 rounded-3xl p-6 shadow-xl animate-in fade-in zoom-in-95 duration-200">
-          <h2 className="text-lg font-bold text-slate-800 mb-6">Recent Users</h2>
+          <h2 className="text-lg font-bold text-slate-800 mb-6">Recent Users (Total: {totalSystemUsers})</h2>
           <div className="space-y-3">
             {users.map(u => (
               <div key={u.telegram_id} className="bg-white border border-slate-200 p-4 rounded-xl flex items-center justify-between">
