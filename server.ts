@@ -116,6 +116,14 @@ async function startServer() {
     res.json({ success: true });
   });
 
+  app.post('/api/leave', (req, res) => {
+    const { telegramId } = req.body;
+    if (telegramId) {
+      activeUsers.delete(Number(telegramId));
+    }
+    res.json({ success: true });
+  });
+
   app.post('/api/support/user-message', (req, res) => {
     const telegramId = Number(req.body.telegramId);
     if (!telegramId) return res.status(400).json({ error: 'Missing telegramId' });
@@ -136,7 +144,7 @@ async function startServer() {
         
         // Check if user is in app, if not send telegram msg
         const lastActive = activeUsers.get(telegramId);
-        const isInApp = lastActive && (Date.now() - lastActive < 35000);
+        const isInApp = lastActive && (Date.now() - lastActive < 15000);
         
         if (!isInApp && bot) {
           try {
@@ -168,8 +176,8 @@ async function startServer() {
 
     const lastActive = activeUsers.get(telegramId);
     
-    // Check if the ping was seen in the last 35 seconds (since ping is every 30s)
-    let isInApp = lastActive && (Date.now() - lastActive < 35000);
+    // Check if the ping was seen in the last 15 seconds (since ping is every 10s)
+    let isInApp = lastActive && (Date.now() - lastActive < 15000);
 
     // If the admin is replying to themselves, technically they are in the admin dashboard.
     // But they probably expect a telegram notification to see if it works.

@@ -35,8 +35,35 @@ export default function App() {
     };
 
     ping();
-    const interval = setInterval(ping, 30000);
-    return () => clearInterval(interval);
+    const interval = setInterval(ping, 10000);
+    
+    const handleUnload = () => {
+      fetch('/api/leave', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ telegramId }),
+        keepalive: true
+      }).catch(console.error);
+    };
+    
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        handleUnload();
+      } else {
+        ping();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('beforeunload', handleUnload);
+    window.addEventListener('unload', handleUnload);
+    
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('beforeunload', handleUnload);
+      window.removeEventListener('unload', handleUnload);
+    };
   }, []);
 
   return (
