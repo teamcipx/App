@@ -15,6 +15,7 @@ import Leaderboard from './pages/Leaderboard';
 import Spin from './pages/Spin';
 import Scratch from './pages/Scratch';
 import Reviews from './pages/Reviews';
+import Menu from './pages/Menu';
 
 export default function App() {
   useEffect(() => {
@@ -88,6 +89,7 @@ export default function App() {
           <Route path="/scratch" element={<Scratch />} />
           <Route path="/history" element={<History />} />
           <Route path="/reviews" element={<Reviews />} />
+          <Route path="/menu" element={<Menu />} />
         </Routes>
         <BottomNav />
         <SupportWidget />

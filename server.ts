@@ -176,13 +176,10 @@ async function startServer() {
 
     const lastActive = activeUsers.get(telegramId);
     
-    // Check if the ping was seen in the last 15 seconds (since ping is every 10s)
     let isInApp = lastActive && (Date.now() - lastActive < 15000);
 
-    // If the admin is replying to themselves, technically they are in the admin dashboard.
-    // But they probably expect a telegram notification to see if it works.
     if (adminId.toString() === telegramId.toString()) {
-      isInApp = false; // Force it to send telegram message for testing
+      isInApp = false;
     }
 
     if (!isInApp && bot) {
@@ -195,6 +192,13 @@ async function startServer() {
     }
     
     res.json({ success: true, isInApp });
+  });
+
+  // Adsgram Task Ad Reward Webhook
+  app.get('/api/adsgram-task-reward', async (req, res) => {
+    // We handle the reward on the client side when the SDK promise resolves.
+    // This endpoint just returns 200 OK so the AdsGram dashboard accepts the webhook URL.
+    res.send('OK');
   });
 
   // API route for broadcasting messages
