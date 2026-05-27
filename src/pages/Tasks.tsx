@@ -1,20 +1,11 @@
-import React, { useEffect, useState, useRef } from "react";
-import { supabase } from "../lib/supabase";
-import WebApp from "@twa-dev/sdk";
-import {
-  CheckCircle,
-  Clock,
-  ExternalLink,
-  ArrowLeft,
-  Loader2,
-  ListTodo,
-  Upload,
-  Award,
-  Coins,
-} from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
-import confetti from "canvas-confetti";
+import React, { useEffect, useState, useRef } from 'react';
+import { supabase } from '../lib/supabase';
+import WebApp from '@twa-dev/sdk';
+import { CheckCircle, Clock, ExternalLink, ArrowLeft, Loader2, ListTodo, Upload, Award, Coins } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import confetti from 'canvas-confetti';
+import { AdsgramTask } from '@adsgram/react';
 
 export default function Tasks() {
   const [loading, setLoading] = useState(true);
@@ -163,39 +154,6 @@ export default function Tasks() {
       return;
     }
 
-    if (task.title.toUpperCase().includes("ADSGRAM")) {
-      // If URL is just a block ID (like task-1234 or int-123), use it. 
-      // If they put a dummy url like https://.., extract block id if specified, else use fallback.
-      let blockId = "task-33103";
-      if (task.url && !task.url.startsWith('http')) {
-        blockId = task.url;
-      } else {
-        // If they put a URL but included the block id at the end, try to extract it
-        const parts = task.url.split('/');
-        const lastPart = parts[parts.length - 1];
-        if (lastPart && (lastPart.startsWith('task-') || lastPart.startsWith('int-') || lastPart.match(/^\d+$/))) {
-          blockId = lastPart;
-        }
-      }
-
-      if (typeof window !== "undefined" && (window as any).Adsgram) {
-        const AdController = (window as any).Adsgram.init({ blockId: blockId });
-        AdController.show()
-          .then((result: any) => {
-            handleCompleteTask(task.id);
-          })
-          .catch((err: any) => {
-            console.error("Adsgram task error:", err);
-            const errorDetail =
-              err && err.description ? err.description : JSON.stringify(err);
-            toast.error(`Ad Error: ${errorDetail}`);
-          });
-      } else {
-        toast.error("Ads SDK not ready yet.");
-      }
-      return;
-    }
-
     // Open URL
     if (WebApp.openLink) {
       WebApp.openLink(task.url);
@@ -283,6 +241,25 @@ export default function Tasks() {
       setSelectedTaskId(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
+  };
+
+  const getAdsgramBlockId = (url: string) => {
+    let blockId = "task-33103";
+    if (url && !url.startsWith("http")) {
+      blockId = url;
+    } else if (url) {
+      const parts = url.split("/");
+      const lastPart = parts[parts.length - 1];
+      if (
+        lastPart &&
+        (lastPart.startsWith("task-") ||
+          lastPart.startsWith("int-") ||
+          lastPart.match(/^\d+$/))
+      ) {
+        blockId = lastPart;
+      }
+    }
+    return blockId;
   };
 
   const handleCompleteTask = async (taskId: string) => {
@@ -443,6 +420,24 @@ export default function Tasks() {
                       হচ্ছে...
                     </button>
                   ) : (
+                    task.title.toUpperCase().includes("ADSGRAM") ? (
+                      <AdsgramTask 
+                        blockId={getAdsgramBlockId(task.url)} 
+                        onReward={() => handleCompleteTask(task.id)} 
+                        onError={(e: any) => toast.error(`Ad Error: ${e.detail}`)}
+                      >
+                         <span slot="reward" style={{display: 'none'}}>{task.reward}</span>
+                         <div slot="button" className={`w-full ${isFailed ? "bg-amber-100 border border-amber-200 text-amber-600 hover:bg-amber-200" : "bg-[#038758] hover:bg-[#026b46] text-white"} py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-transform active:scale-[0.98] shadow-sm cursor-pointer`}>
+                           টাস্ক শুরু করুন <ExternalLink className="w-5 h-5" />
+                         </div>
+                         <div slot="claim" className={`w-full bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-transform active:scale-[0.98] shadow-sm cursor-pointer`}>
+                           রিওয়ার্ড ক্লেইম করুন 
+                         </div>
+                         <div slot="done" className={`w-full bg-slate-100 text-slate-500 py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 border border-slate-200`}>
+                           সম্পন্ন <CheckCircle className="w-5 h-5" />
+                         </div>
+                      </AdsgramTask>
+                    ) : (
                     <button
                       onClick={() => handleStartTask(task)}
                       className={`w-full ${isFailed ? "bg-amber-100 border border-amber-200 text-amber-600 hover:bg-amber-200" : "bg-[#038758] hover:bg-[#026b46] text-white"} py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-transform active:scale-[0.98] shadow-sm`}
@@ -458,6 +453,7 @@ export default function Tasks() {
                         <ExternalLink className="w-5 h-5" />
                       )}
                     </button>
+                    )
                   )
                 ) : (
                   <button
