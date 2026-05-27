@@ -607,7 +607,7 @@ export default function Admin() {
           <div className="bg-white border border-slate-200 p-4 rounded-xl mb-6 space-y-4">
             <h3 className="text-sm font-bold text-slate-700">Add New Task</h3>
             <input type="text" placeholder="Task Title (e.g. Visit our sponsor)" value={newTask.title} onChange={e => setNewTask({...newTask, title: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-slate-800 text-sm" />
-            <input type="url" placeholder="URL Link" value={newTask.url} onChange={e => setNewTask({...newTask, url: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-slate-800 text-sm" />
+            <input type="text" placeholder="URL Link or AdsGram Block ID" value={newTask.url} onChange={e => setNewTask({...newTask, url: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-slate-800 text-sm" />
             <div className="flex gap-4">
               <div className="flex-1">
                 <label className="text-xs text-slate-500 mb-1 block">Reward Coins</label>

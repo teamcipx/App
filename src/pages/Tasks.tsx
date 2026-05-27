@@ -163,8 +163,21 @@ export default function Tasks() {
       return;
     }
 
-    if (task.title.includes("[ADSGRAM]")) {
-      const blockId = "task-33103"; // Using the given task blockId by priority
+    if (task.title.toUpperCase().includes("ADSGRAM")) {
+      // If URL is just a block ID (like task-1234 or int-123), use it. 
+      // If they put a dummy url like https://.., extract block id if specified, else use fallback.
+      let blockId = "task-33103";
+      if (task.url && !task.url.startsWith('http')) {
+        blockId = task.url;
+      } else {
+        // If they put a URL but included the block id at the end, try to extract it
+        const parts = task.url.split('/');
+        const lastPart = parts[parts.length - 1];
+        if (lastPart && (lastPart.startsWith('task-') || lastPart.startsWith('int-') || lastPart.match(/^\d+$/))) {
+          blockId = lastPart;
+        }
+      }
+
       if (typeof window !== "undefined" && (window as any).Adsgram) {
         const AdController = (window as any).Adsgram.init({ blockId: blockId });
         AdController.show()
