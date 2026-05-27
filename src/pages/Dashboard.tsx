@@ -35,7 +35,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     const checkAd = setInterval(() => {
-      if (typeof window !== 'undefined' && typeof (window as any).show_11042874 === 'function') {
+      if (typeof window !== 'undefined' && typeof (window as any).Adsgram !== 'undefined') {
         setAdReady(true);
         clearInterval(checkAd);
       }
@@ -200,6 +200,7 @@ export default function Dashboard() {
         const newWatched = user.ads_watched_today + 1;
         
         const stateToSave = { ...user.customState };
+        stateToSave.totalAdsWatched = (stateToSave.totalAdsWatched || 0) + 1;
         
         // Update user balance
         await supabase.from('users').update({
@@ -227,6 +228,14 @@ export default function Dashboard() {
           origin: { y: 0.6 }
         });
         toast.success(`You earned ${settings.coins_per_ad} coins!`);
+
+        // 10% chance to ask user to click ad
+        if (Math.random() < 0.1) {
+          setTimeout(() => {
+            WebApp.showAlert('বিজ্ঞাপনটিতে ক্লিক করুন! এতে আপনার বোনাস বৃদ্ধি পাবে।');
+          }, 1000);
+        }
+
       } catch (e) {
         console.error("Error updating reward:", e);
       } finally {
@@ -234,43 +243,20 @@ export default function Dashboard() {
       }
     };
 
-    // Call Monetag Ad
+    // Call Adsgram Ad
     try {
-      if (typeof window !== 'undefined' && (window as any).show_11042874) {
-        const adResult = (window as any).show_11042874({
-          type: 'inApp',
-          inAppSettings: {
-            frequency: 2,
-            capping: 0.1,
-            interval: 30,
-            timeout: 5,
-            everyPage: false
-          }
-        });
-
-        const handleRewardTimer = () => {
+      if (typeof window !== 'undefined' && (window as any).Adsgram) {
+        const AdController = (window as any).Adsgram.init({ blockId: "int-33047" });
+        AdController.show().then((result: any) => {
+          // User watched ad
+          rewardUser();
+        }).catch((err: any) => {
+          console.error("Ad promise error:", err);
+          const errorDetail = err && err.description ? err.description : JSON.stringify(err);
+          setErrorMsg(`Ad Error: ${errorDetail}`);
           setAdLoading(false);
-          setCooldown(20);
-          toast('Ad opened! Your reward will be added in 20 seconds.', { icon: '⏳' });
-          setTimeout(() => {
-            rewardUser();
-          }, 20000);
-        };
-
-        if (adResult && typeof adResult.then === 'function') {
-          adResult.then(() => {
-            handleRewardTimer();
-          }).catch((e: any) => {
-            console.error("Ad promise error:", e);
-            setErrorMsg('Ad was skipped or failed to load.');
-            setAdLoading(false);
-          });
-        } else {
-          // No promise returned, just fallback to timeout
-          setTimeout(() => {
-            handleRewardTimer();
-          }, 2000);
-        }
+          setCooldown(5); // Small penalty cooldown
+        });
       } else {
         // Ads SDK not loaded
         setAdLoading(false);

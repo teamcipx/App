@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import WebApp from '@twa-dev/sdk';
-import { Users, Copy, ArrowLeft, Loader2, User, Wallet } from 'lucide-react';
+import { Users, Copy, ArrowLeft, Loader2, User, Wallet, Award, Star, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function Account() {
@@ -97,6 +97,77 @@ export default function Account() {
             <p className="text-slate-500 text-xs font-medium mb-1">রেফারেল বোনাস</p>
             <p className="text-2xl font-bold tracking-tight text-[#038758]">500 <span className="text-sm">xNC</span></p>
           </div>
+        </div>
+      </div>
+
+      <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl mb-6">
+        <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+          <Award className="w-5 h-5 text-[#038758]" /> 
+          আপনার অর্জনসমূহ
+        </h2>
+        
+        <div className="grid grid-cols-2 gap-3">
+          {(() => {
+            let cs = { totalAdsWatched: 0, totalWithdrawals: 0 };
+            try {
+              if (user?.last_ad_date) {
+                cs = { ...cs, ...JSON.parse(user.last_ad_date) };
+              }
+            } catch(e) {}
+            
+            const badges = [
+              {
+                id: '10_ads',
+                title: 'Starter',
+                desc: '10 Ads Watched',
+                icon: <Star className="w-6 h-6" />,
+                unlocked: cs.totalAdsWatched >= 10,
+                color: 'from-blue-400 to-blue-600'
+              },
+              {
+                id: '100_ads',
+                title: 'Power User',
+                desc: '100 Ads Watched',
+                icon: <Zap className="w-6 h-6" />,
+                unlocked: cs.totalAdsWatched >= 100,
+                color: 'from-purple-400 to-purple-600'
+              },
+              {
+                id: 'first_withdraw',
+                title: 'First Payout',
+                desc: 'Cash Out 1x',
+                icon: <Wallet className="w-6 h-6" />,
+                unlocked: cs.totalWithdrawals >= 1,
+                color: 'from-amber-400 to-amber-600'
+              },
+              {
+                id: '10_refs',
+                title: 'Influencer',
+                desc: '10 Referrals',
+                icon: <Users className="w-6 h-6" />,
+                unlocked: referrals >= 10,
+                color: 'from-emerald-400 to-emerald-600'
+              }
+            ];
+
+            return badges.map(b => (
+              <div 
+                key={b.id} 
+                className={`border rounded-2xl p-4 flex flex-col items-center text-center transition-all ${
+                  b.unlocked 
+                    ? 'border-[#038758]/30 bg-[#038758]/5 shadow-sm' 
+                    : 'border-slate-200 bg-slate-50 opacity-60 grayscale'
+                }`}
+              >
+                <div className={`w-12 h-12 rounded-full mb-3 flex items-center justify-center text-white bg-gradient-to-br ${b.color}`}>
+                  {b.icon}
+                </div>
+                <h3 className="font-bold text-slate-800 text-sm mb-1">{b.title}</h3>
+                <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">{b.desc}</p>
+                {b.unlocked && <div className="mt-2 bg-[#038758] text-white text-[10px] px-2 py-0.5 rounded-full font-bold">UNLOCKED</div>}
+              </div>
+            ));
+          })()}
         </div>
       </div>
 

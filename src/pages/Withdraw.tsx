@@ -89,9 +89,21 @@ export default function Withdraw() {
         amount: amt,
       }]);
       
+      let customState = { totalWithdrawals: 0 };
+      try {
+        if (user.last_ad_date) {
+           customState = { ...customState, ...JSON.parse(user.last_ad_date) };
+        }
+      } catch(e) {}
+      
+      customState.totalWithdrawals = (customState.totalWithdrawals || 0) + 1;
+
       // Deduct balance
       await supabase.from('users')
-        .update({ balance: user.balance - amt })
+        .update({ 
+          balance: user.balance - amt,
+          last_ad_date: JSON.stringify(customState)
+        })
         .eq('telegram_id', user.telegram_id);
       
       // Give 10% to referrer if exists
