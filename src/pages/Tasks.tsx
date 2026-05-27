@@ -5,7 +5,6 @@ import { CheckCircle, Clock, ExternalLink, ArrowLeft, Loader2, ListTodo, Upload,
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import confetti from 'canvas-confetti';
-import { AdsgramTask } from '@adsgram/react';
 
 export default function Tasks() {
   const [loading, setLoading] = useState(true);
@@ -154,6 +153,26 @@ export default function Tasks() {
       return;
     }
 
+    if (task.title.toUpperCase().includes("ADSGRAM")) {
+      const blockId = getAdsgramBlockId(task.url);
+      if (typeof window !== "undefined" && (window as any).Adsgram) {
+        const AdController = (window as any).Adsgram.init({ blockId: blockId });
+        AdController.show()
+          .then((result: any) => {
+            handleCompleteTask(task.id);
+          })
+          .catch((err: any) => {
+            console.error("Adsgram task error:", err);
+            const errorDetail =
+              err && err.description ? err.description : JSON.stringify(err);
+            toast.error(`Ad Error: ${errorDetail}`);
+          });
+      } else {
+        toast.error("Ads SDK not ready yet.");
+      }
+      return;
+    }
+
     // Open URL
     if (WebApp.openLink) {
       WebApp.openLink(task.url);
@@ -244,7 +263,7 @@ export default function Tasks() {
   };
 
   const getAdsgramBlockId = (url: string) => {
-    let blockId = "task-33103";
+    let blockId = "33103";
     if (url && !url.startsWith("http")) {
       blockId = url;
     } else if (url) {
@@ -259,6 +278,13 @@ export default function Tasks() {
         blockId = lastPart;
       }
     }
+    
+    // Adsgram SDK expects either just numbers (for tasks/banners) or "int-XXXX" for interstitials.
+    // If the user provided "task-33103", we must strip "task-" and return just "33103".
+    if (blockId.startsWith("task-")) {
+      blockId = blockId.replace("task-", "");
+    }
+    
     return blockId;
   };
 
@@ -420,24 +446,6 @@ export default function Tasks() {
                       হচ্ছে...
                     </button>
                   ) : (
-                    task.title.toUpperCase().includes("ADSGRAM") ? (
-                      <AdsgramTask 
-                        blockId={getAdsgramBlockId(task.url)} 
-                        onReward={() => handleCompleteTask(task.id)} 
-                        onError={(e: any) => toast.error(`Ad Error: ${e.detail}`)}
-                      >
-                         <span slot="reward" style={{display: 'none'}}>{task.reward}</span>
-                         <div slot="button" className={`w-full ${isFailed ? "bg-amber-100 border border-amber-200 text-amber-600 hover:bg-amber-200" : "bg-[#038758] hover:bg-[#026b46] text-white"} py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-transform active:scale-[0.98] shadow-sm cursor-pointer`}>
-                           টাস্ক শুরু করুন <ExternalLink className="w-5 h-5" />
-                         </div>
-                         <div slot="claim" className={`w-full bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-transform active:scale-[0.98] shadow-sm cursor-pointer`}>
-                           রিওয়ার্ড ক্লেইম করুন 
-                         </div>
-                         <div slot="done" className={`w-full bg-slate-100 text-slate-500 py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 border border-slate-200`}>
-                           সম্পন্ন <CheckCircle className="w-5 h-5" />
-                         </div>
-                      </AdsgramTask>
-                    ) : (
                     <button
                       onClick={() => handleStartTask(task)}
                       className={`w-full ${isFailed ? "bg-amber-100 border border-amber-200 text-amber-600 hover:bg-amber-200" : "bg-[#038758] hover:bg-[#026b46] text-white"} py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-transform active:scale-[0.98] shadow-sm`}
@@ -453,7 +461,6 @@ export default function Tasks() {
                         <ExternalLink className="w-5 h-5" />
                       )}
                     </button>
-                    )
                   )
                 ) : (
                   <button
