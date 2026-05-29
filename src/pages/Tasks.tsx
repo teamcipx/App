@@ -192,8 +192,7 @@ export default function Tasks() {
           .then(() => handleCompleteTask(task.id))
           .catch((err: any) => {
             console.error("OnclickA play error:", err);
-            // Ignore error or show toast, but we should let user try again
-            toast.error("Ad video failed to play or closed early.");
+            toast.error("দুঃখিত, এই মুহূর্তে কোনো অ্যাড নেই অথবা আপনি অ্যাডটি কেটে দিয়েছেন। আবার চেষ্টা করুন।");
           });
       };
 
