@@ -5,6 +5,11 @@ import cors from 'cors';
 import { createServer as createViteServer } from 'vite';
 import TelegramBot from 'node-telegram-bot-api';
 import { createClient } from '@supabase/supabase-js';
+import WebSocket from 'ws';
+
+if (typeof global.WebSocket === 'undefined') {
+  (global as any).WebSocket = WebSocket;
+}
 
 const PORT = 3000;
 const app = express();
