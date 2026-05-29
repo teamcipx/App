@@ -174,6 +174,26 @@ export default function Tasks() {
       return;
     }
 
+    if (task.title.toUpperCase().includes("ONCLICKA")) {
+      const spotId = task.url && /^\d+$/.test(task.url) ? task.url : '442749';
+      if (typeof window !== "undefined" && (window as any).initCdTma) {
+        (window as any).initCdTma({ id: spotId })
+          .then((showFn: any) => {
+            return showFn();
+          })
+          .then(() => {
+            handleCompleteTask(task.id);
+          })
+          .catch((err: any) => {
+            console.error("OnclickA task error:", err);
+            toast.error(`Ad Error: Failed to show OnclickA ad`);
+          });
+      } else {
+        toast.error("OnclickA SDK not ready yet.");
+      }
+      return;
+    }
+
     // Open URL
     if (WebApp.openLink) {
       WebApp.openLink(task.url);
@@ -466,7 +486,7 @@ export default function Tasks() {
                       >
                         {task.title.includes("[PLAYSTORE]")
                           ? "স্ক্রিনশট আপলোড করুন"
-                          : task.title.toUpperCase().includes("ADSGRAM")
+                          : task.title.toUpperCase().includes("ADSGRAM") || task.title.toUpperCase().includes("ONCLICKA")
                             ? "অ্যাড দেখুন"
                             : isFailed
                               ? "আবার শুরু করুন"

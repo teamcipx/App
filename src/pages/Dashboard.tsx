@@ -7,6 +7,7 @@ import PromoDialog from '../components/PromoDialog';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import confetti from 'canvas-confetti';
+import { motion } from 'motion/react';
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);
@@ -243,8 +244,7 @@ export default function Dashboard() {
       }
     };
 
-    // Call Adsgram Ad
-    try {
+    const showAdsgramAd = () => {
       if (typeof window !== 'undefined' && (window as any).Adsgram) {
         const AdController = (window as any).Adsgram.init({ blockId: "int-33047" });
         AdController.show().then((result: any) => {
@@ -265,6 +265,31 @@ export default function Dashboard() {
         setTimeout(() => {
           rewardUser();
         }, 20000);
+      }
+    };
+
+    try {
+      const isOnclickA = Math.random() < 0.5;
+      
+      if (isOnclickA) {
+        if (typeof window !== "undefined" && (window as any).initCdTma) {
+          (window as any).initCdTma({ id: '442749' }) // using the spot ID from previous task
+            .then((showFn: any) => {
+              return showFn();
+            })
+            .then(() => {
+              rewardUser();
+            })
+            .catch((err: any) => {
+              console.error("OnclickA task error:", err);
+              // Fallback to Adsgram if OnclickA fails
+              showAdsgramAd();
+            });
+        } else {
+          showAdsgramAd();
+        }
+      } else {
+        showAdsgramAd();
       }
     } catch (e) {
       console.error(e);
@@ -366,11 +391,21 @@ export default function Dashboard() {
 
         {!user?.is_banned && (
           <div className="space-y-4 pt-2">
-            <div className="flex justify-between items-center px-2">
-               <span className="text-slate-600 font-medium text-sm">আজকের প্রগ্রেস</span>
-               <span className="text-sm font-bold text-[#038758]">
-                 {user?.ads_watched_today || 0} / {settings?.daily_ad_limit || 0}
-               </span>
+            <div className="space-y-2 px-2">
+              <div className="flex justify-between items-center">
+                 <span className="text-slate-600 font-medium text-sm">আজকের প্রগ্রেস</span>
+                 <span className="text-sm font-bold text-[#038758]">
+                   {user?.ads_watched_today || 0} / {settings?.daily_ad_limit || 0}
+                 </span>
+              </div>
+              <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                 <motion.div 
+                   className="h-full bg-[#038758]"
+                   initial={{ width: 0 }}
+                   animate={{ width: `${Math.min(100, ((user?.ads_watched_today || 0) / (settings?.daily_ad_limit || 1)) * 100)}%` }}
+                   transition={{ duration: 1, ease: 'easeOut' }}
+                 />
+              </div>
             </div>
             
             <button
