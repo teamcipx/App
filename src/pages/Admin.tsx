@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { supabase } from '../lib/supabase';
-import { Settings as SettingsIcon, Users, Check, X, Loader2, Save, Send, Ban, MessageSquare, Inbox, Archive, Trash } from 'lucide-react';
+import { Settings as SettingsIcon, Users, Check, X, Loader2, Save, Send, Ban, MessageSquare, Inbox, Archive, Trash, Image as ImageIcon } from 'lucide-react';
 import WebApp from '@twa-dev/sdk';
 import { toast } from 'sonner';
 
@@ -22,6 +22,72 @@ export default function Admin() {
   const [activeTab, setActiveTab] = useState<'settings' | 'users' | 'broadcast' | 'withdraw' | 'tasks' | 'support' | 'promos'>('settings');
 
   const [chatFilter, setChatFilter] = useState<'active' | 'all'>('active');
+  const [imgUploading, setImgUploading] = useState(false);
+  const imgInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAdminImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !selectedChat) return;
+
+    if (!imgbbKey) {
+      toast.error('ImgBB keys not configured.');
+      return;
+    }
+
+    setImgUploading(true);
+    let uploadedUrl = null;
+    const formData = new FormData();
+    formData.append('image', file);
+
+    let success = false;
+    const keys = imgbbKey.split(',').map(k => k.trim());
+    for (const key of keys) {
+      if (!key) continue;
+      try {
+        const response = await fetch(`https://api.imgbb.com/1/upload?key=${key}`, {
+          method: 'POST',
+          body: formData
+        });
+        const data = await response.json();
+        if (data.success) {
+          success = true;
+          uploadedUrl = data.data.url;
+          break;
+        }
+      } catch (err) {
+        console.error('ImgBB upload error:', err);
+      }
+    }
+
+    if (!success) {
+      toast.error('Failed to upload image.');
+      setImgUploading(false);
+      return;
+    }
+
+    await supabase.from('support_messages').insert([{
+      telegram_id: selectedChat.telegram_id,
+      sender: 'admin',
+      message: 'Attached Image',
+      image_url: uploadedUrl
+    }]);
+
+    await supabase.from('support_chats').update({ updated_at: new Date().toISOString() }).eq('telegram_id', selectedChat.telegram_id);
+
+    fetch('/api/support/admin-reply', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        telegramId: selectedChat.telegram_id, 
+        message: 'Attached Image',
+        imageUrl: uploadedUrl,
+        adminId: telegramId
+      })
+    }).catch(console.error);
+
+    setImgUploading(false);
+    if (imgInputRef.current) imgInputRef.current.value = '';
+  };
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const telegramId = WebApp?.initDataUnsafe?.user?.id || 7360769822;
@@ -425,7 +491,22 @@ export default function Admin() {
                 <div ref={messagesEndRef} />
               </div>
 
-              <form onSubmit={handleAdminReply} className="p-4 border-t border-slate-200 bg-slate-50 flex gap-2">
+              <form onSubmit={handleAdminReply} className="p-4 border-t border-slate-200 bg-slate-50 flex gap-2 items-center">
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  ref={imgInputRef} 
+                  onChange={handleAdminImageUpload} 
+                  className="hidden" 
+                />
+                <button 
+                  type="button"
+                  disabled={imgUploading}
+                  onClick={() => imgInputRef.current?.click()}
+                  className="text-slate-400 hover:text-[#038758] p-2 transition-colors"
+                >
+                   {imgUploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ImageIcon className="w-5 h-5" />}
+                </button>
                 <input 
                   type="text"
                   value={adminReply}

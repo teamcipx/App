@@ -167,7 +167,7 @@ async function startServer() {
 
   app.post('/api/support/admin-reply', async (req, res) => {
     const telegramId = Number(req.body.telegramId);
-    const { message, adminId } = req.body;
+    const { message, adminId, imageUrl } = req.body;
     
     const envAdminId = process.env.ADMIN_TELEGRAM_ID || process.env.VITE_ADMIN_TELEGRAM_ID;
     if (!adminId || !envAdminId || adminId.toString() !== envAdminId.toString()) {
@@ -188,9 +188,14 @@ async function startServer() {
     }
 
     if (!isInApp && bot) {
-      const text = `অ্যাডমিন আপনার মেসেজের জবাব দিয়েছেন,\n\nReply : ${message}`;
       try {
-        await bot.sendMessage(telegramId, text);
+        if (imageUrl) {
+          const text = `অ্যাডমিন আপনার মেসেজের জবাব দিয়েছেন:\n\n${message}`;
+          await bot.sendPhoto(telegramId, imageUrl, { caption: text });
+        } else {
+          const text = `অ্যাডমিন আপনার মেসেজের জবাব দিয়েছেন,\n\nReply : ${message}`;
+          await bot.sendMessage(telegramId, text);
+        }
       } catch (e) {
         console.error('[admin-reply] Failed to notify user via telegram:', e);
       }
