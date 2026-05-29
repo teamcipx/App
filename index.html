@@ -8,11 +8,16 @@
     <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
     <script src="https://js.onclckvd.com/in-stream-ad-admanager/tma.js"></script>
     <script>
-      if (window.initCdTma) {
-        window.initCdTma({ id: '442749' })
-          .then(function(show) { window.showOnclickABase = show; })
-          .catch(function(e) { console.error("OnclickA default init error:", e); });
+      function initOnclickA() {
+        if (window.initCdTma) {
+          window.initCdTma({ id: '442749' })
+            .then(function(show) { window.showOnclickABase = show; })
+            .catch(function(e) { console.error("OnclickA default init error:", e); });
+        } else {
+          setTimeout(initOnclickA, 100);
+        }
       }
+      initOnclickA();
     </script>
   </head>
   <body>

@@ -486,7 +486,7 @@ export default function Tasks() {
                     task.title.toUpperCase().includes("ADSGRAM") && getAdsgramBlockId(task.url).startsWith('task-') ? (
                       <AdsgramTask 
                         className="w-full block"
-                        blockId={getAdsgramBlockId(task.url)} 
+                        blockId={getAdsgramBlockId(task.url) as `task-${number}`} 
                         onReward={() => handleCompleteTask(task.id)} 
                         onError={(e: any) => toast.error(`Ad Error: ${e.detail || 'Failed'}`)}
                       >
