@@ -120,12 +120,8 @@ export default function Dashboard() {
         if (startParam && startParam !== telegramId.toString()) {
           const referrerId = Number(startParam);
           if (!isNaN(referrerId)) {
-            const { data: referrer, error: refErr } = await supabase.from('users').select('*').eq('telegram_id', referrerId).single();
-            if (referrer) {
-               await supabase.from('users').update({ balance: referrer.balance + 500 }).eq('telegram_id', referrerId);
                initialBalance = 500; 
                referredBy = referrerId;
-            }
           }
         }
 
@@ -142,7 +138,7 @@ export default function Dashboard() {
 
         let { error: insertError } = await supabase.from('users').insert([newUser]);
         
-        if (insertError) {
+        if (insertError && insertError.code !== '23505') {
            console.error('Error creating user (might be missing referred_by column?):', insertError);
            // Retry without referred_by
            if (newUser.referred_by !== undefined) {
@@ -150,6 +146,13 @@ export default function Dashboard() {
              const retryRes = await supabase.from('users').insert([newUser]);
              insertError = retryRes.error;
            }
+        }
+        
+        if (!insertError && referredBy) {
+            const { data: referrer } = await supabase.from('users').select('*').eq('telegram_id', referredBy).single();
+            if (referrer) {
+               await supabase.from('users').update({ balance: referrer.balance + 500 }).eq('telegram_id', referredBy);
+            }
         }
         
         if (insertError && insertError.code !== '23505') { // 23505 is unique violation

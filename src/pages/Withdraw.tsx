@@ -40,7 +40,7 @@ export default function Withdraw() {
       const { data: dbSettings } = await supabase.from('settings').select('*').single();
       if (dbSettings) setSettings(dbSettings);
 
-      const { data: refs } = await supabase.from('users').select('telegram_id').eq('referred_by', telegramId);
+      const { data: refs } = await supabase.from('users').select('telegram_id').eq('referred_by', telegramId.toString());
       if (refs) setReferrals(refs.length);
     } catch (err) {
       console.error(err);

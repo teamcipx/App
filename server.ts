@@ -53,25 +53,18 @@ if (token) {
           if (startParam && startParam !== chatId.toString()) {
             const referrerId = Number(startParam);
             if (!isNaN(referrerId)) {
-              const { data: referrer } = await supabase.from('users').select('*').eq('telegram_id', referrerId).single();
-              if (referrer) {
-                // Reward referrer
-                await supabase.from('users').update({ balance: referrer.balance + 500 }).eq('telegram_id', referrerId);
                 initialBalance = 500;
                 referredBy = referrerId;
-                
-                // Send Telegram message to referrer
-                bot?.sendMessage(referrerId, `🎉 *নতুন রেফারেল!*\n\nকেউ মাত্র আপনার লিংক ব্যবহার করে যুক্ত হয়েছে। আপনি ৫০০ কয়েন পেয়েছেন! 💰`, { parse_mode: 'Markdown' }).catch(console.error);
-              }
             }
           }
 
 
+          const newCustomState = { date: today, spinsToday: 0, lastSpinTime: 0, scratchesToday: 0 };
           const newUser: any = {
             telegram_id: chatId,
             balance: initialBalance,
             ads_watched_today: 0,
-            last_ad_date: today
+            last_ad_date: JSON.stringify(newCustomState)
           };
 
           if (referredBy) newUser.referred_by = referredBy;
@@ -83,6 +76,17 @@ if (token) {
               delete newUser.referred_by;
               await supabase.from('users').insert([newUser]);
             }
+          }
+          
+          if (!insertError && referredBy) {
+              const { data: referrer } = await supabase.from('users').select('*').eq('telegram_id', referredBy).single();
+              if (referrer) {
+                // Reward referrer
+                await supabase.from('users').update({ balance: referrer.balance + 500 }).eq('telegram_id', referredBy);
+                
+                // Send Telegram message to referrer
+                bot?.sendMessage(referredBy, `🎉 *নতুন রেফারেল!*\n\nকেউ মাত্র আপনার লিংক ব্যবহার করে যুক্ত হয়েছে। আপনি ৫০০ কয়েন পেয়েছেন! 💰`, { parse_mode: 'Markdown' }).catch(console.error);
+              }
           }
         }
       } catch (err) {

@@ -111,6 +111,7 @@ export default function Admin() {
   }, [telegramId]);
 
   const [imgbbKey, setImgbbKey] = useState('');
+  const [botUsername, setBotUsername] = useState('');
 
   const fetchData = async () => {
     setLoading(true);
@@ -122,6 +123,9 @@ export default function Admin() {
 
       const { data: imgData } = await supabase.from('tasks').select('url').eq('title', 'SYSTEM_IMGBB_KEYS').single();
       if (imgData) setImgbbKey(imgData.url);
+
+      const { data: botData } = await supabase.from('tasks').select('url').eq('title', 'SYSTEM_BOT_USERNAME').single();
+      if (botData) setBotUsername(botData.url);
 
       // Fetch withdrawals
       const { data: w, error: wErr } = await supabase.from('withdrawals').select('*').eq('status', 'pending').order('created_at', { ascending: false }).limit(50);
@@ -285,6 +289,13 @@ export default function Admin() {
       await supabase.from('tasks').update({ url: imgbbKey }).eq('id', data.id);
     } else {
       await supabase.from('tasks').insert([{ title: 'SYSTEM_IMGBB_KEYS', url: imgbbKey, reward: 0, wait_time: 0, is_active: false }]);
+    }
+
+    const { data: bData } = await supabase.from('tasks').select('id').eq('title', 'SYSTEM_BOT_USERNAME').single();
+    if (bData) {
+      await supabase.from('tasks').update({ url: botUsername.replace('https://t.me/', '').replace('@', '') }).eq('id', bData.id);
+    } else {
+      await supabase.from('tasks').insert([{ title: 'SYSTEM_BOT_USERNAME', url: botUsername.replace('https://t.me/', '').replace('@', ''), reward: 0, wait_time: 0, is_active: false }]);
     }
     
     setSaving(false);
@@ -572,6 +583,17 @@ export default function Admin() {
                 value={settings?.coin_rate || ''}
                 onChange={e => handleUpdateSetting('coin_rate', parseFloat(e.target.value))}
                 className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-800 focus:outline-none focus:border-[#038758]"
+              />
+            </div>
+            
+            <div className="pt-4 mt-4 border-t border-slate-200">
+              <label className="block text-sm font-medium text-slate-500 mb-1">Telegram Bot Username (Required for Referrals)</label>
+              <input 
+                type="text" 
+                value={botUsername} 
+                onChange={(e) => setBotUsername(e.target.value)} 
+                placeholder="e.g. xnearnbot (Without @)"
+                className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-800 focus:outline-none focus:border-[#038758]" 
               />
             </div>
             

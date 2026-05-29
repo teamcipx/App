@@ -10,12 +10,12 @@ export default function Account() {
   const [referrals, setReferrals] = useState(0);
   const [referredUsers, setReferredUsers] = useState<any[]>([]);
   const [copied, setCopied] = useState(false);
+  const [botName, setBotName] = useState(import.meta.env.VITE_BOT_NAME || 'xnearnbot');
   const navigate = useNavigate();
 
   const telegramUser = WebApp?.initDataUnsafe?.user;
   const telegramId = telegramUser?.id || 7360769822; // Fallback for dev
   const userName = telegramUser ? `${telegramUser.first_name || ''} ${telegramUser.last_name || ''}`.trim() : 'Guest User';
-  const botName = import.meta.env.VITE_BOT_NAME || 'xnearnbot'; // Make sure this env var exists or fallback
   
   useEffect(() => {
     fetchData();
@@ -24,13 +24,16 @@ export default function Account() {
   const fetchData = async () => {
     setLoading(true);
     try {
+      const { data: bData } = await supabase.from('tasks').select('url').eq('title', 'SYSTEM_BOT_USERNAME').single();
+      if (bData && bData.url) setBotName(bData.url);
+
       const { data: userData } = await supabase.from('users').select('*').eq('telegram_id', telegramId).single();
       if (userData) {
         setUser(userData);
       }
       
       // Get referrals list
-      const { data: refs } = await supabase.from('users').select('telegram_id, created_at').eq('referred_by', telegramId).order('created_at', { ascending: false });
+      const { data: refs } = await supabase.from('users').select('telegram_id, created_at').eq('referred_by', telegramId.toString()).order('created_at', { ascending: false });
       
       if (refs) {
         setReferredUsers(refs);
