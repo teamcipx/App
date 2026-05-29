@@ -296,8 +296,14 @@ export default function Admin() {
         }),
       });
       
-      const result = await response.json();
-      if (response.ok && result.success) {
+      let result;
+      try {
+        result = await response.json();
+      } catch (e) {
+        throw new Error('Server is currently updating or offline. Please try again in a few seconds.');
+      }
+      
+      if (response.ok && result?.success) {
         WebApp.showAlert(result.message || 'Broadcast has started in the background.');
         setBroadcastMsg('');
         setBroadcastBtnText('');
