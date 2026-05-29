@@ -272,17 +272,27 @@ export default function Dashboard() {
       const isOnclickA = Math.random() < 0.5;
       
       if (isOnclickA) {
-        if (typeof window !== "undefined" && (window as any).initCdTma) {
-          (window as any).initCdTma({ id: '442749' }) // using the spot ID from previous task
-            .then((showFn: any) => {
-              return showFn();
-            })
-            .then(() => {
-              rewardUser();
-            })
+        
+        const playAd = (showFn: any) => {
+          showFn()
+            .then(() => rewardUser())
             .catch((err: any) => {
               console.error("OnclickA task error:", err);
               // Fallback to Adsgram if OnclickA fails
+              showAdsgramAd();
+             });
+        };
+
+        if ((window as any).showOnclickABase) {
+          playAd((window as any).showOnclickABase);
+        } else if (typeof window !== "undefined" && (window as any).initCdTma) {
+          (window as any).initCdTma({ id: '442749' })
+            .then((showFn: any) => {
+              (window as any).showOnclickABase = showFn;
+              playAd(showFn);
+            })
+            .catch((err: any) => {
+              console.error("OnclickA init error:", err);
               showAdsgramAd();
             });
         } else {

@@ -117,6 +117,11 @@ export default function Tasks() {
   };
 
   const isTaskAvailable = (taskId: string) => {
+    const task = tasks.find(t => t.id === taskId);
+    if (task && (task.title.toUpperCase().includes("ADSGRAM") || task.title.toUpperCase().includes("ONCLICKA"))) {
+      return true;
+    }
+
     const ut = userTasks.find((ut) => ut.task_id === taskId);
     if (!ut) return true;
 
@@ -129,6 +134,11 @@ export default function Tasks() {
   };
 
   const getTaskStatus = (taskId: string) => {
+    const task = tasks.find(t => t.id === taskId);
+    if (task && (task.title.toUpperCase().includes("ADSGRAM") || task.title.toUpperCase().includes("ONCLICKA"))) {
+      return { status: "available", timeRemaining: 0 };
+    }
+
     const ut = userTasks.find((ut) => ut.task_id === taskId);
     if (!ut) return { status: "available", timeRemaining: 0 };
 
@@ -176,20 +186,33 @@ export default function Tasks() {
 
     if (task.title.toUpperCase().includes("ONCLICKA")) {
       const spotId = task.url && /^\d+$/.test(task.url) ? task.url : '442749';
-      if (typeof window !== "undefined" && (window as any).initCdTma) {
+      
+      const playAd = (showFn: any) => {
+        showFn()
+          .then(() => handleCompleteTask(task.id))
+          .catch((err: any) => {
+            console.error("OnclickA play error:", err);
+            // Ignore error or show toast, but we should let user try again
+            toast.error("Ad video failed to play or closed early.");
+          });
+      };
+
+      if (spotId === '442749' && (window as any).showOnclickABase) {
+         playAd((window as any).showOnclickABase);
+      } else if ((window as any)[`showOnclickA_${spotId}`]) {
+         playAd((window as any)[`showOnclickA_${spotId}`]);
+      } else if (typeof window !== "undefined" && (window as any).initCdTma) {
         (window as any).initCdTma({ id: spotId })
           .then((showFn: any) => {
-            return showFn();
-          })
-          .then(() => {
-            handleCompleteTask(task.id);
+            (window as any)[`showOnclickA_${spotId}`] = showFn;
+            playAd(showFn);
           })
           .catch((err: any) => {
-            console.error("OnclickA task error:", err);
-            toast.error(`Ad Error: Failed to show OnclickA ad`);
+            console.error("OnclickA init error:", err);
+            toast.error(`Ad Init Error: Failed to initialize OnclickA`);
           });
       } else {
-        toast.error("OnclickA SDK not ready yet.");
+        toast.error("OnclickA SDK not ready yet. Please try again later.");
       }
       return;
     }

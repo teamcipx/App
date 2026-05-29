@@ -58,7 +58,7 @@ export default function Admin() {
       if (imgData) setImgbbKey(imgData.url);
 
       // Fetch withdrawals
-      const { data: w, error: wErr } = await supabase.from('withdrawals').select('*').order('created_at', { ascending: false }).limit(50);
+      const { data: w, error: wErr } = await supabase.from('withdrawals').select('*').eq('status', 'pending').order('created_at', { ascending: false }).limit(50);
       if (wErr) console.error('Error fetching withdrawals:', wErr);
       if (w) setWithdrawals(w);
 
@@ -282,12 +282,6 @@ export default function Admin() {
     setSendingBroadcast(true);
     
     try {
-      // Get all user telegram IDs
-      const { data: allUsers } = await supabase.from('users').select('telegram_id');
-      if (!allUsers) return;
-      
-      const ids = allUsers.map(u => u.telegram_id);
-      
       const response = await fetch('/api/broadcast', {
         method: 'POST',
         headers: {
@@ -295,7 +289,7 @@ export default function Admin() {
         },
         body: JSON.stringify({
           message: broadcastMsg,
-          users: ids,
+          broadcastType: 'all',
           adminId: telegramId,
           buttonText: broadcastBtnText,
           buttonUrl: broadcastBtnUrl
@@ -304,7 +298,7 @@ export default function Admin() {
       
       const result = await response.json();
       if (response.ok && result.success) {
-        WebApp.showAlert(`Message sent to ${result.successCount} users. Failed: ${result.failCount}`);
+        WebApp.showAlert(result.message || 'Broadcast has started in the background.');
         setBroadcastMsg('');
         setBroadcastBtnText('');
         setBroadcastBtnUrl('');

@@ -203,7 +203,7 @@ async function startServer() {
 
   // API route for broadcasting messages
   app.post('/api/broadcast', async (req, res) => {
-    const { message, users, adminId, buttonText, buttonUrl } = req.body;
+    const { message, users, broadcastType, adminId, buttonText, buttonUrl } = req.body;
     
     const envAdminId = process.env.ADMIN_TELEGRAM_ID || process.env.VITE_ADMIN_TELEGRAM_ID;
 
@@ -214,9 +214,6 @@ async function startServer() {
     if (!bot) {
       return res.status(400).json({ error: 'Bot is not configured' });
     }
-
-    let successCount = 0;
-    let failCount = 0;
 
     const options: any = {};
     if (buttonText && buttonUrl) {
@@ -231,17 +228,52 @@ async function startServer() {
       };
     }
 
-    for (const telegramId of users) {
-      try {
-        await bot.sendMessage(telegramId, message, options);
-        successCount++;
-      } catch (err) {
-        console.error(`Failed to send message to ${telegramId}:`, err);
-        failCount++;
-      }
-    }
+    res.json({ success: true, message: 'Broadcast is running in background' });
 
-    res.json({ success: true, successCount, failCount });
+    // Run broadcast asynchronously
+    setTimeout(async () => {
+      let successCount = 0;
+      let failCount = 0;
+      let userList: string[] = users || [];
+
+      try {
+        if (broadcastType === 'all' || userList.length === 0) {
+          if (supabase) {
+            userList = [];
+            let i = 0;
+            // Iterate over all users page by page
+            while (true) {
+              const { data: pageUsers, error } = await supabase
+                .from('users')
+                .select('telegram_id')
+                .range(i, i + 999);
+              
+              if (error || !pageUsers || pageUsers.length === 0) break;
+              
+              pageUsers.forEach(u => userList.push(u.telegram_id));
+              i += 1000;
+            }
+          }
+        }
+
+        console.log(`Starting broadcast to ${userList.length} users.`);
+
+        for (const telegramId of userList) {
+          try {
+            await bot.sendMessage(telegramId, message, options);
+            successCount++;
+            // Sleep to avoid rate limiting
+            await new Promise(r => setTimeout(r, 40));
+          } catch (err) {
+            failCount++;
+          }
+        }
+        
+        console.log(`Broadcast finished. Success: ${successCount}, Fail: ${failCount}`);
+      } catch (err) {
+        console.error('Broadcast background process error:', err);
+      }
+    }, 0);
   });
 
   // Vite middleware for development
