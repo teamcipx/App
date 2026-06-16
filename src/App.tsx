@@ -16,6 +16,7 @@ import Spin from './pages/Spin';
 import Scratch from './pages/Scratch';
 import Reviews from './pages/Reviews';
 import Menu from './pages/Menu';
+import Referrals from './pages/Referrals';
 
 export default function App() {
   useEffect(() => {
@@ -90,6 +91,7 @@ export default function App() {
           <Route path="/history" element={<History />} />
           <Route path="/reviews" element={<Reviews />} />
           <Route path="/menu" element={<Menu />} />
+          <Route path="/referrals" element={<Referrals />} />
         </Routes>
         <BottomNav />
         <SupportWidget />

@@ -92,11 +92,14 @@ export default function Account() {
         </button>
 
         <div className="grid grid-cols-2 gap-4 border-t border-slate-200 pt-6">
-          <div>
-            <p className="text-slate-500 text-xs font-medium mb-1">সর্বমোট রেফারেল</p>
+          <div onClick={() => navigate('/referrals')} className="cursor-pointer hover:bg-slate-50 p-2 -m-2 rounded-xl transition-colors">
+            <div className="flex items-center gap-2 mb-1">
+              <p className="text-slate-500 text-xs font-medium">সর্বমোট রেফারেল</p>
+              <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-full font-bold">See All</span>
+            </div>
             <p className="text-2xl font-bold tracking-tight text-slate-800">{referrals}</p>
           </div>
-          <div>
+          <div className="p-2 -m-2">
             <p className="text-slate-500 text-xs font-medium mb-1">রেফারেল বোনাস</p>
             <p className="text-2xl font-bold tracking-tight text-[#038758]">500 <span className="text-sm">xNC</span></p>
           </div>

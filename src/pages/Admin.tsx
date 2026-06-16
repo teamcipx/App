@@ -472,7 +472,7 @@ export default function Admin() {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col h-[600px] bg-white">
+            <div className="flex flex-col h-[100dvh] md:h-[600px] bg-white fixed inset-0 z-50 md:relative md:inset-auto">
               <div className="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
                 <div className="flex items-center gap-3">
                   <button onClick={() => setSelectedChat(null)} className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 transition-colors">
@@ -489,13 +489,16 @@ export default function Admin() {
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {supportMessages.map((msg, i) => (
                   <div key={i} className={`flex ${msg.sender === 'admin' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[70%] rounded-2xl px-4 py-2 text-sm ${msg.sender === 'admin' ? 'bg-[#038758] text-slate-800 rounded-br-sm' : 'bg-slate-100 text-slate-700 rounded-bl-sm'}`}>
+                    <div className={`max-w-[70%] rounded-2xl px-4 py-2 text-sm ${msg.sender === 'admin' ? 'bg-[#038758] text-white rounded-br-sm' : 'bg-slate-100 text-slate-700 rounded-bl-sm'}`}>
                       {msg.image_url && (
                         <div className="mb-2">
                           <img src={msg.image_url} alt="Attachment" className="max-w-full rounded-lg object-cover cursor-pointer hover:opacity-90" onClick={() => window.open(msg.image_url, '_blank')} />
                         </div>
                       )}
-                      {msg.message}
+                      <div>{msg.message}</div>
+                      <div className={`text-[10px] mt-1 ${msg.sender === 'admin' ? 'text-white/70 text-right' : 'text-slate-500 text-left'}`}>
+                        {new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                      </div>
                     </div>
                   </div>
                 ))}

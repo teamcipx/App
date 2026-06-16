@@ -216,7 +216,10 @@ export default function SupportWidget() {
                   {msg.image_url && (
                     <img src={msg.image_url} alt="Attachment" className="max-w-full rounded-lg mb-2 object-cover" />
                   )}
-                  {msg.message}
+                  <div>{msg.message}</div>
+                  <div className={`text-[10px] mt-1 ${msg.sender === 'user' ? 'text-white/70 text-right' : 'text-slate-400 text-left'}`}>
+                    {new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                  </div>
                 </div>
               </div>
             ))}
