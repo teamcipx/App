@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import {
   User,
+  Users,
   Trophy,
   History,
   Star,
@@ -59,6 +60,13 @@ export default function Menu() {
       icon: Gift,
       color: "text-indigo-500",
       bg: "bg-indigo-50",
+    },
+    {
+      name: "রেফারেলস",
+      path: "/referrals",
+      icon: Users,
+      color: "text-emerald-500",
+      bg: "bg-emerald-50",
     },
   ];
 
